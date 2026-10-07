@@ -2555,6 +2555,179 @@ async function ensureChartOfAccountsTable() {
 }
 
 /* =========================================================
+   CORE NEURA TABLES
+========================================================= */
+
+async function ensureCoreTables() {
+
+    const statements = [
+
+        /* =================================================
+           SUPPLIERS
+        ================================================= */
+
+        `
+        CREATE TABLE IF NOT EXISTS suppliers (
+            supplier_id INT NOT NULL AUTO_INCREMENT,
+            supplier_code VARCHAR(20) NOT NULL,
+            supplier_name VARCHAR(150) NOT NULL,
+            supplier_address VARCHAR(255),
+            tin_number VARCHAR(30),
+            contact_person VARCHAR(150),
+            contact_number VARCHAR(30),
+            email VARCHAR(150),
+            supplier_type VARCHAR(100),
+            payment_terms VARCHAR(100),
+
+            status ENUM(
+                'Active',
+                'Inactive'
+            ) NOT NULL DEFAULT 'Active',
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            PRIMARY KEY (supplier_id),
+            UNIQUE KEY unique_supplier_code (supplier_code)
+
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        `,
+
+
+        /* =================================================
+           CUSTOMERS
+        ================================================= */
+
+        `
+        CREATE TABLE IF NOT EXISTS customers (
+            customer_id INT NOT NULL AUTO_INCREMENT,
+            customer_code VARCHAR(20) NOT NULL,
+            customer_name VARCHAR(150) NOT NULL,
+            customer_address VARCHAR(255),
+            tin_number VARCHAR(30),
+            contact_person VARCHAR(150),
+            contact_number VARCHAR(30),
+            email VARCHAR(150),
+            customer_type VARCHAR(100),
+            payment_terms VARCHAR(100),
+
+            status ENUM(
+                'Active',
+                'Inactive'
+            ) NOT NULL DEFAULT 'Active',
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            PRIMARY KEY (customer_id),
+            UNIQUE KEY unique_customer_code (customer_code)
+
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        `,
+
+
+        /* =================================================
+           PURCHASE BATCHES
+        ================================================= */
+
+        `
+        CREATE TABLE IF NOT EXISTS purchase_batches (
+            batch_id INT NOT NULL AUTO_INCREMENT,
+            batch_code VARCHAR(20) NOT NULL,
+            batch_name VARCHAR(100) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            PRIMARY KEY (batch_id),
+            UNIQUE KEY unique_purchase_batch_code (batch_code)
+
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        `,
+
+
+        /* =================================================
+           PURCHASE JOURNAL ENTRIES
+        ================================================= */
+
+        `
+        CREATE TABLE IF NOT EXISTS purchase_journal_entries (
+            entry_id INT NOT NULL AUTO_INCREMENT,
+            batch_id INT NOT NULL,
+            entry_date DATE NOT NULL,
+            document_no VARCHAR(50) NOT NULL,
+            payee VARCHAR(150) NOT NULL,
+            particulars VARCHAR(255),
+            business_activity VARCHAR(150),
+
+            status ENUM(
+                'Draft',
+                'Posted',
+                'Cancelled'
+            ) NOT NULL DEFAULT 'Draft',
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            PRIMARY KEY (entry_id),
+
+            CONSTRAINT fk_purchase_entry_batch
+                FOREIGN KEY (batch_id)
+                REFERENCES purchase_batches(batch_id)
+                ON DELETE RESTRICT
+
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        `,
+
+
+        /* =================================================
+           PURCHASE JOURNAL LINES
+        ================================================= */
+
+        `
+        CREATE TABLE IF NOT EXISTS purchase_journal_lines (
+            line_id INT NOT NULL AUTO_INCREMENT,
+            entry_id INT NOT NULL,
+
+            debit_account_id INT NOT NULL,
+            debit_amount DECIMAL(15,2)
+                NOT NULL DEFAULT 0.00,
+
+            credit_account_id INT NOT NULL,
+            credit_amount DECIMAL(15,2)
+                NOT NULL DEFAULT 0.00,
+
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            PRIMARY KEY (line_id),
+
+            CONSTRAINT fk_purchase_line_entry
+                FOREIGN KEY (entry_id)
+                REFERENCES purchase_journal_entries(entry_id)
+                ON DELETE CASCADE,
+
+            CONSTRAINT fk_purchase_debit_account
+                FOREIGN KEY (debit_account_id)
+                REFERENCES chart_of_accounts(account_id)
+                ON DELETE RESTRICT,
+
+            CONSTRAINT fk_purchase_credit_account
+                FOREIGN KEY (credit_account_id)
+                REFERENCES chart_of_accounts(account_id)
+                ON DELETE RESTRICT
+
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        `
+
+    ];
+
+
+    for (const statement of statements) {
+
+        await pool.execute(
+            statement
+        );
+
+    }
+
+}
+
+/* =========================================================
    SALES JOURNAL TABLES
 ========================================================= */
 
@@ -3622,6 +3795,8 @@ app.listen(
             await connection.ping();
 
             await ensureChartOfAccountsTable();
+
+            await ensureCoreTables();
 
             await ensureSalesJournalTables();
 
