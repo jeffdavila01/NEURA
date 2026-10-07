@@ -2527,6 +2527,32 @@ app.delete(
     }
 );
 
+/* =========================================================
+   CHART OF ACCOUNTS TABLE
+========================================================= */
+
+async function ensureChartOfAccountsTable() {
+
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS chart_of_accounts (
+            account_id INT NOT NULL AUTO_INCREMENT,
+            account_code VARCHAR(20) NOT NULL,
+            account_name VARCHAR(150) NOT NULL,
+            account_type ENUM(
+                'Assets',
+                'Liabilities',
+                'Equity',
+                'Revenue',
+                'Expenses'
+            ) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            PRIMARY KEY (account_id),
+            UNIQUE KEY unique_account_code (account_code)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+}
 
 /* =========================================================
    SALES JOURNAL TABLES
@@ -3594,6 +3620,8 @@ app.listen(
                 await pool.getConnection();
 
             await connection.ping();
+
+            await ensureChartOfAccountsTable();
 
             await ensureSalesJournalTables();
 
