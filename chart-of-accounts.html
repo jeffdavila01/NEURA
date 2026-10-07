@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chart of Accounts | NEURA</title>
+
+    <link rel="icon" type="image/png" href="images/neura.png">
+
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+    <script src="js/excel-system.js" defer></script>
+    <script src="js/excel-modules.js" defer></script>
+    <script src="js/baseline-hover.js" defer></script>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <img src="images/neura.png" alt="NEURA Logo">
+            </div>
+
+            <div>
+                <h2>NEURA</h2>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="index.html" class="nav-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="chart-of-accounts.html" class="nav-link active">
+                <span class="nav-icon">▤</span>
+                <span>Chart of Accounts</span>
+            </a>
+
+            <a href="purchase-journal.html" class="nav-link">
+                <span class="nav-icon">↓</span>
+                <span>Purchase Journal</span>
+            </a>
+
+            <a href="sales-journal.html" class="nav-link">
+                <span class="nav-icon">↑</span>
+                <span>Sales Journal</span>
+            </a>
+
+            <a href="supplier.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Supplier</span>
+            </a>
+
+            <a href="customer.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Customer</span>
+            </a>
+
+            <a href="administrator.html" class="nav-link">
+                <span class="nav-icon">⚙</span>
+                <span>Administrator</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <p>
+                Account System
+            </p>
+
+            <small>
+                Version 1.0
+            </small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Chart of Accounts
+                </h1>
+
+                <p>
+                    Create and manage accounting accounts
+                </p>
+
+            </div>
+
+
+            <div class="admin-profile">
+
+                <div class="admin-avatar">
+                    AD
+                </div>
+
+                <div>
+
+                    <strong>
+                        Administrator
+                    </strong>
+
+                    <span>
+                        System Admin
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             TOOLBAR
+        ================================================== -->
+
+        <section class="coa-toolbar">
+
+            <button type="button" class="primary-btn" id="createAccountBtn" aria-expanded="false">
+                + Create
+            </button>
+
+
+            <div class="coa-toolbar-right">
+
+                <button type="button" class="secondary-btn" id="importExcelBtn">
+                    Import Template to Excel
+                </button>
+
+
+                <button type="button" class="secondary-btn" id="exportExcelBtn">
+                    Export Template to Excel
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CREATE ACCOUNT
+        ================================================== -->
+
+        <section class="panel coa-form-panel" id="accountFormPanel" hidden>
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Create Account</h2>
+                </div>
+
+            </div>
+
+
+            <form id="accountForm" class="coa-form">
+
+                <div class="form-group">
+
+                    <label for="accountType">
+                        Account Type
+                    </label>
+
+                    <select id="accountType" name="accountType" required>
+
+                        <option value="Assets">
+                            Assets
+                        </option>
+
+                        <option value="Liabilities">
+                            Liabilities
+                        </option>
+
+                        <option value="Equity">
+                            Equity
+                        </option>
+
+                        <option value="Revenue">
+                            Revenue
+                        </option>
+
+                        <option value="Expenses">
+                            Expenses
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="accountCode">
+                        Account Code
+                    </label>
+
+                    <input type="text" id="accountCode" name="accountCode" placeholder="01-1001" maxlength="7" readonly
+                        required>
+
+
+
+                </div>
+
+
+                <div class="form-group coa-account-name">
+
+                    <label for="accountName">
+                        Account Name
+                    </label>
+
+                    <input type="text" id="accountName" name="accountName" placeholder="Example: Cash on Hand"
+                        autocomplete="off" required>
+
+                </div>
+
+
+                <div class="form-submit">
+
+                    <button type="submit" class="primary-btn" id="submitAccountBtn">
+                        Submit
+                    </button>
+
+                    <button type="button" class="secondary-btn" id="cancelAccountBtn">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- =================================================
+             ACCOUNT LIST
+        ================================================== -->
+
+        <section class="panel coa-list-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Accounts</h2>
+                </div>
+
+
+                <div class="coa-search">
+
+                    <input type="search" id="accountSearch" placeholder="Search code, account or type...">
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table class="coa-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Account Code</th>
+
+                            <th>Account Name</th>
+
+                            <th>Account Type</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="accountTableBody">
+
+                        <tr class="empty-row">
+
+                            <td colspan="3">
+                                Loading accounts...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

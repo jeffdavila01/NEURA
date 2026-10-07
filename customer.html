@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Customers | NEURA</title>
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="images/neura.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <script
+        src="js/app.js"
+        defer
+    ></script>
+
+    <script
+        src="js/excel-system.js"
+        defer
+    ></script>
+
+    <script
+        src="js/excel-modules.js"
+        defer
+    ></script>
+
+    <script
+        src="js/baseline-hover.js"
+        defer
+    ></script>
+</head>
+
+
+<body class="supplier-page customer-page">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+
+                <img
+                    src="images/neura.png"
+                    alt="NEURA Logo"
+                >
+
+            </div>
+
+            <div>
+                <h2>NEURA</h2>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="index.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ▦
+                </span>
+
+                <span>
+                    Dashboard
+                </span>
+            </a>
+
+
+            <a
+                href="chart-of-accounts.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ▤
+                </span>
+
+                <span>
+                    Chart of Accounts
+                </span>
+            </a>
+
+
+            <a
+                href="purchase-journal.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ↓
+                </span>
+
+                <span>
+                    Purchase Journal
+                </span>
+            </a>
+
+
+            <a
+                href="sales-journal.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ↑
+                </span>
+
+                <span>
+                    Sales Journal
+                </span>
+            </a>
+
+
+            <a
+                href="supplier.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ♙
+                </span>
+
+                <span>
+                    Supplier
+                </span>
+            </a>
+
+
+            <a
+                href="customer.html"
+                class="nav-link active"
+            >
+                <span class="nav-icon">
+                    ♙
+                </span>
+
+                <span>
+                    Customer
+                </span>
+            </a>
+
+
+            <a
+                href="administrator.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ⚙
+                </span>
+
+                <span>
+                    Administrator
+                </span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <p>
+                Account System
+            </p>
+
+            <small>
+                Version 1.0
+            </small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Customers
+                </h1>
+
+                <p>
+                    Create and manage customer records
+                </p>
+
+            </div>
+
+
+            <div class="admin-profile">
+
+                <div class="admin-avatar">
+                    AD
+                </div>
+
+                <div>
+
+                    <strong>
+                        Administrator
+                    </strong>
+
+                    <span>
+                        System Admin
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             CUSTOMER TOOLBAR
+        ================================================== -->
+
+        <section
+            class="panel supplier-toolbar-panel customer-toolbar"
+        >
+
+            <div class="supplier-toolbar">
+
+                <div>
+
+                    <button
+                        type="button"
+                        id="toggleCustomerFormBtn"
+                        class="primary-btn"
+                        aria-expanded="false"
+                    >
+                        + Create Customer
+                    </button>
+
+                </div>
+
+
+                <div class="customer-toolbar-right">
+
+                    <!--
+                        Universal Excel buttons
+                        will be connected here later.
+                    -->
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CUSTOMER FORM
+        ================================================== -->
+
+        <section
+            class="panel supplier-form-panel is-hidden"
+            id="customerFormPanel"
+        >
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>
+                        Create Customer
+                    </h2>
+
+                    <p>
+                        Add customer information to NEURA.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form
+                id="customerForm"
+                class="supplier-form"
+            >
+
+
+                <!-- CUSTOMER CODE -->
+
+                <div
+                    class="form-group supplier-code-field"
+                >
+
+                    <label for="customerCode">
+                        Customer Code
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerCode"
+                        name="customerCode"
+                        placeholder="CUS-0001"
+                        readonly
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CUSTOMER NAME -->
+
+                <div class="form-group">
+
+                    <label for="customerName">
+                        Customer Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerName"
+                        name="customerName"
+                        placeholder="ABC Trading"
+                        autocomplete="off"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- TIN -->
+
+                <div class="form-group">
+
+                    <label for="customerTin">
+                        TIN Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerTin"
+                        name="customerTin"
+                        placeholder="123-456-789-000"
+                    >
+
+                </div>
+
+
+                <!-- CUSTOMER TYPE -->
+
+                <div class="form-group">
+
+                    <label for="customerType">
+                        Customer Type
+                    </label>
+
+                    <select
+                        id="customerType"
+                        name="customerType"
+                    >
+
+                        <option value="Regular">
+                            Regular
+                        </option>
+
+                        <option value="Retail">
+                            Retail
+                        </option>
+
+                        <option value="Wholesale">
+                            Wholesale
+                        </option>
+
+                        <option value="Corporate">
+                            Corporate
+                        </option>
+
+                        <option value="Government">
+                            Government
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ADDRESS -->
+
+                <div
+                    class="form-group supplier-wide"
+                >
+
+                    <label for="customerAddress">
+                        Customer Address
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerAddress"
+                        name="customerAddress"
+                        placeholder="Navotas City, Metro Manila"
+                    >
+
+                </div>
+
+
+                <!-- CONTACT PERSON -->
+
+                <div class="form-group">
+
+                    <label for="customerContactPerson">
+                        Contact Person
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerContactPerson"
+                        name="customerContactPerson"
+                        placeholder="Juan Dela Cruz"
+                    >
+
+                </div>
+
+
+                <!-- CONTACT NUMBER -->
+
+                <div class="form-group">
+
+                    <label for="customerContactNumber">
+                        Contact Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="customerContactNumber"
+                        name="customerContactNumber"
+                        placeholder="0917-123-4567"
+                    >
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div
+                    class="form-group supplier-wide"
+                >
+
+                    <label for="customerEmail">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="customerEmail"
+                        name="customerEmail"
+                        placeholder="customer@example.com"
+                    >
+
+                </div>
+
+
+                <!-- PAYMENT TERMS -->
+
+                <div class="form-group">
+
+                    <label for="customerPaymentTerms">
+                        Payment Terms
+                    </label>
+
+                    <select
+                        id="customerPaymentTerms"
+                        name="customerPaymentTerms"
+                    >
+
+                        <option value="Cash">
+                            Cash
+                        </option>
+
+                        <option value="7 Days">
+                            7 Days
+                        </option>
+
+                        <option value="15 Days">
+                            15 Days
+                        </option>
+
+                        <option value="30 Days">
+                            30 Days
+                        </option>
+
+                        <option value="60 Days">
+                            60 Days
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="form-group">
+
+                    <label for="customerStatus">
+                        Status
+                    </label>
+
+                    <select
+                        id="customerStatus"
+                        name="customerStatus"
+                    >
+
+                        <option value="Active">
+                            Active
+                        </option>
+
+                        <option value="Inactive">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div
+                    class="form-submit supplier-submit"
+                >
+
+                    <button
+                        type="submit"
+                        class="primary-btn"
+                        id="saveCustomerBtn"
+                    >
+                        Save Customer
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        id="cancelCustomerBtn"
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- =================================================
+             CUSTOMER LIST
+        ================================================== -->
+
+        <section
+            class="panel supplier-list-panel"
+        >
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>
+                        Customer List
+                    </h2>
+
+                    <p>
+                        Registered customers
+                    </p>
+
+                </div>
+
+
+                <div class="supplier-search">
+
+                    <input
+                        type="search"
+                        id="customerSearch"
+                        placeholder="Search customer..."
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table class="supplier-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Customer Code
+                            </th>
+
+                            <th>
+                                Customer Name
+                            </th>
+
+                            <th>
+                                TIN
+                            </th>
+
+                            <th>
+                                Contact Person
+                            </th>
+
+                            <th>
+                                Contact Number
+                            </th>
+
+                            <th>
+                                Customer Type
+                            </th>
+
+                            <th>
+                                Payment Terms
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="customerTableBody">
+
+                        <tr class="empty-row">
+
+                            <td colspan="9">
+                                Loading customers...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

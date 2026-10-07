@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sales Journal | NEURA</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <link rel="icon" type="image/png" href="images/neura.png">
+
+    <script src="js/app.js" defer></script>
+
+    <script src="js/sales-sheet.js" defer></script>
+
+    <script src="js/excel-system.js" defer></script>
+
+    <script src="js/excel-modules.js" defer></script>
+
+    <script src="js/baseline-hover.js" defer></script>
+</head>
+
+
+<body class="purchase-journal-page">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+
+                <img src="images/neura.png" alt="NEURA Logo">
+
+            </div>
+
+            <div>
+                <h2>NEURA</h2>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="index.html" class="nav-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+
+            <a href="chart-of-accounts.html" class="nav-link">
+                <span class="nav-icon">▤</span>
+                <span>Chart of Accounts</span>
+            </a>
+
+
+            <a href="purchase-journal.html" class="nav-link">
+                <span class="nav-icon">↓</span>
+                <span>Purchase Journal</span>
+            </a>
+
+
+            <a href="sales-journal.html" class="nav-link active">
+                <span class="nav-icon">↑</span>
+                <span>Sales Journal</span>
+            </a>
+
+
+            <a href="supplier.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Supplier</span>
+            </a>
+
+
+            <a href="customer.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Customer</span>
+            </a>
+
+
+            <a href="administrator.html" class="nav-link">
+                <span class="nav-icon">⚙</span>
+                <span>Administrator</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <p>Account System</p>
+
+            <small>Version 1.0</small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>Sales Journal</h1>
+
+                <p>
+                    Record and manage sales transactions
+                </p>
+
+            </div>
+
+
+            <div class="admin-profile">
+
+                <div class="admin-avatar">
+                    AD
+                </div>
+
+                <div>
+
+                    <strong>
+                        Administrator
+                    </strong>
+
+                    <span>
+                        System Admin
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             TOOLBAR
+        ================================================== -->
+
+        <section class="purchase-toolbar">
+
+            <button type="button" id="showSalesBatchFormBtn" class="primary-btn" aria-expanded="false">
+                + Create Batch
+            </button>
+
+        </section>
+
+
+        <!-- =================================================
+             CREATE BATCH
+        ================================================== -->
+
+        <section class="panel purchase-batch-panel" id="salesBatchFormPanel" hidden>
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>Create Batch</h2>
+
+                    <p>
+                        Create a batch for sales journal entries.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form id="salesBatchForm" class="purchase-batch-form">
+
+                <div class="form-group">
+
+                    <label for="salesBatchCode">
+                        Batch Code
+                    </label>
+
+                    <input type="text" id="salesBatchCode" maxlength="20" placeholder="SAL" required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="salesBatchName">
+                        Batch Name
+                    </label>
+
+                    <input type="text" id="salesBatchName" maxlength="100" placeholder="SALES" required>
+
+                </div>
+
+
+                <div class="form-submit">
+
+                    <button type="submit" class="primary-btn">
+                        Submit
+                    </button>
+
+
+                    <button type="button" class="secondary-btn" id="cancelSalesBatchFormBtn">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- =================================================
+             BATCH LIST
+        ================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>Sales Batches</h2>
+
+                    <p>
+                        Select the batch to use for the journal entry.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Batch Code</th>
+
+                            <th>Batch Name</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="salesBatchTableBody">
+
+                        <tr class="empty-row">
+
+                            <td colspan="3">
+                                Loading batches...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             START ENTRY
+
+             Important:
+             ID salesEntryForm is preserved for app.js,
+             but this is intentionally a DIV so the old
+             single-line submit does not run.
+        ================================================== -->
+
+        <section class="panel sales-entry-start-panel" id="salesEntryForm">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>New Sales Entry</h2>
+
+                    <p>
+                        Select a Batch then open the journal sheet.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="sales-entry-start">
+
+                <div class="form-group">
+
+                    <label for="salesBatch">
+                        Batch
+                    </label>
+
+
+                    <div class="sales-batch-proceed-row">
+
+                        <select id="salesBatch" required>
+
+                            <option value="">
+                                Select Batch
+                            </option>
+
+                        </select>
+
+
+                        <button type="button" class="primary-btn" id="salesProceedBtn">
+                            Proceed
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             HISTORY
+        ================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>
+                        Sales Journal History
+                    </h2>
+
+                    <p>
+                        Posted sales transactions
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Date</th>
+
+                            <th>Doc No.</th>
+
+                            <th>Customer</th>
+
+                            <th>Debit Account</th>
+
+                            <th>Debit</th>
+
+                            <th>Credit Account</th>
+
+                            <th>Credit</th>
+
+                            <th>Particulars</th>
+
+                            <th>Business Activity</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="salesJournalTableBody">
+
+                        <tr class="empty-row">
+
+                            <td colspan="10">
+                                No sales journal entries.
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         SALES JOURNAL POPUP SHEET
+    ====================================================== -->
+
+    <div class="sales-sheet-overlay" id="salesSheetOverlay" hidden>
+
+        <section class="sales-sheet-modal" role="dialog" aria-modal="true" aria-labelledby="salesSheetTitle">
+
+
+            <!-- =============================================
+                 MODAL HEADER
+            ============================================== -->
+
+            <div class="sales-sheet-topbar">
+
+                <div>
+
+                    <span class="sales-sheet-eyebrow">
+                        SALES JOURNAL
+                    </span>
+
+                    <h2 id="salesSheetTitle">
+                        Sales Entry Sheet
+                    </h2>
+
+                    <p>
+                        Complete the sale and accounting entry.
+                    </p>
+
+                </div>
+
+
+                <button type="button" id="closeSalesSheetBtn" class="sales-sheet-close-btn"
+                    aria-label="Close Sales Journal">
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- =============================================
+                 DOCUMENT STATUS
+            ============================================== -->
+
+            <div class="sales-sheet-document-bar">
+
+                <div>
+
+                    <span>
+                        Active Document
+                    </span>
+
+                    <strong id="salesSheetActiveDocument">
+                        01-0001
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Batch
+                    </span>
+
+                    <strong id="salesSheetBatchName">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Status
+                    </span>
+
+                    <strong id="salesSheetStatus">
+                        Open
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 SCROLL CONTENT
+            ============================================== -->
+
+            <div class="sales-sheet-scroll">
+
+
+                <!-- =========================================
+                     BASIC INFORMATION
+                ========================================== -->
+
+                <section class="sales-sheet-section">
+
+                    <div class="sales-sheet-section-title">
+
+                        <h3>
+                            Sales Information
+                        </h3>
+
+                        <p>
+                            Enter information about the sale.
+                        </p>
+
+                    </div>
+
+
+                    <div class="sales-sheet-info-grid">
+
+                        <div class="form-group">
+
+                            <label for="salesDate">
+                                Date
+                            </label>
+
+                            <input type="date" id="salesDate">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="salesDocumentNo">
+                                Doc No.
+                            </label>
+
+                            <input type="text" id="salesDocumentNo" value="01-0001" readonly>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="salesCustomer">
+                                Customer
+                            </label>
+
+                            <select id="salesCustomer">
+
+                                <option value="">
+                                    Select Customer
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="salesPaymentMethod">
+                                Payment Method
+                            </label>
+
+                            <select id="salesPaymentMethod">
+
+                                <option value="">
+                                    Select Payment Method
+                                </option>
+
+                                <option value="Cash">
+                                    Cash
+                                </option>
+
+                                <option value="GCash">
+                                    GCash
+                                </option>
+
+                                <option value="Bank">
+                                    Bank
+                                </option>
+
+                                <option value="Credit">
+                                    Credit / Accounts Receivable
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================================
+                     ITEMS SOLD
+                ========================================== -->
+
+                <section class="sales-sheet-section">
+
+                    <div class="sales-sheet-section-header">
+
+                        <div class="sales-sheet-section-title">
+
+                            <h3>
+                                Items / Products Sold
+                            </h3>
+
+                            <p>
+                                Enter what was sold to the customer.
+                            </p>
+
+                        </div>
+
+
+                        <button type="button" class="secondary-btn" id="addSalesItemBtn">
+                            + Add Item
+                        </button>
+
+                    </div>
+
+
+                    <div class="sales-sheet-table-wrap">
+
+                        <table class="sales-sheet-table sales-items-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Item / Product
+                                    </th>
+
+                                    <th>
+                                        Quantity
+                                    </th>
+
+                                    <th>
+                                        Unit Price
+                                    </th>
+
+                                    <th>
+                                        Total
+                                    </th>
+
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="salesItemsBody">
+
+                                <tr class="sales-item-row">
+
+                                    <td>
+
+                                        <input type="text" class="sales-item-name" placeholder="Product or service">
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input type="number" class="sales-item-qty" min="0" step="0.01" placeholder="0">
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input type="number" class="sales-item-price" min="0" step="0.01"
+                                            placeholder="0.00">
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input type="text" class="sales-item-total" value="₱0.00" readonly>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <button type="button" class="sales-remove-row-btn" disabled>
+                                            ×
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <div class="sales-items-summary">
+
+                        <span>
+                            Total Sales Amount
+                        </span>
+
+                        <strong id="salesItemsGrandTotal">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================================
+                     ACCOUNTING ENTRY
+                ========================================== -->
+
+                <section class="sales-sheet-section">
+
+                    <div class="sales-sheet-section-header">
+
+                        <div class="sales-sheet-section-title">
+
+                            <h3>
+                                Accounting Entry
+                            </h3>
+
+                            <p>
+                                Select Debit and Credit accounts manually
+                                from the Chart of Accounts.
+                            </p>
+
+                        </div>
+
+
+                        <button type="button" class="secondary-btn" id="addSalesAccountingRowBtn">
+                            + Add Row
+                        </button>
+
+                    </div>
+
+
+                    <div class="sales-sheet-table-wrap">
+
+                        <table class="sales-sheet-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Debit Account
+                                    </th>
+
+                                    <th>
+                                        Debit Amount
+                                    </th>
+
+                                    <th>
+                                        Credit Account
+                                    </th>
+
+                                    <th>
+                                        Credit Amount
+                                    </th>
+
+                                    <th>
+                                        Particulars
+                                    </th>
+
+                                    <th>
+                                        Business Activity
+                                    </th>
+
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="salesAccountingBody">
+
+                                <tr class="sales-accounting-row">
+
+                                    <td>
+
+                                        <select id="salesDebitAccount" class="sales-debit-account">
+
+                                            <option value="">
+                                                Select Account
+                                            </option>
+
+                                        </select>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input type="number" id="salesDebitAmount" class="sales-debit-amount" min="0"
+                                            step="0.01" placeholder="0.00">
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <select id="salesCreditAccount" class="sales-credit-account">
+
+                                            <option value="">
+                                                Select Account
+                                            </option>
+
+                                        </select>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input type="number" id="salesCreditAmount" class="sales-credit-amount" min="0"
+                                            step="0.01" placeholder="0.00">
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input type="text" id="salesParticulars" class="sales-particulars"
+                                            placeholder="Description">
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <input type="text" id="salesBusinessActivity" class="sales-business-activity"
+                                            placeholder="Business Activity">
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <button type="button" class="sales-remove-row-btn" disabled>
+                                            ×
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================================
+                     TOTALS
+                ========================================== -->
+
+                <section class="sales-balance-area">
+
+                    <div class="sales-balance-message">
+
+                        <strong>
+                            Balance Check
+                        </strong>
+
+                        <p id="salesBalanceMessage">
+                            Enter Debit and Credit amounts.
+                        </p>
+
+                    </div>
+
+
+                    <div class="sales-balance-totals">
+
+                        <div>
+
+                            <span>
+                                Total Debit
+                            </span>
+
+                            <strong id="salesDebitTotal">
+                                ₱0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Total Credit
+                            </span>
+
+                            <strong id="salesCreditTotal">
+                                ₱0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="sales-difference-card">
+
+                            <span>
+                                Difference
+                            </span>
+
+                            <strong id="salesDifference">
+                                ₱0.00
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- =============================================
+                 FOOTER
+            ============================================== -->
+
+            <div class="sales-sheet-footer">
+
+                <button type="button" class="secondary-btn" id="cancelSalesSheetBtn">
+                    Close
+                </button>
+
+
+                <div class="sales-sheet-footer-right">
+
+                    <button type="button" class="secondary-btn" id="checkSaveSalesBtn">
+                        Check & Save
+                    </button>
+
+
+                    <button type="button" class="primary-btn" id="salesSheetPostBtn" disabled>
+                        Post Entry
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</body>
+
+</html>

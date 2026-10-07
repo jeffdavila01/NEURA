@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | NEURA</title>
+
+    <link rel="icon" type="image/png" href="images/neura.png">
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/app.js" defer></script>
+    <script src="js/excel-system.js" defer></script>
+    <script src="js/excel-modules.js" defer></script>
+    <script src="js/baseline-hover.js" defer></script>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <img src="images/neura.png" alt="NEURA Logo">
+            </div>
+
+            <div>
+                <h2>NEURA</h2>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="index.html" class="nav-link active">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="chart-of-accounts.html" class="nav-link">
+                <span class="nav-icon">▤</span>
+                <span>Chart of Accounts</span>
+            </a>
+
+            <a href="purchase-journal.html" class="nav-link">
+                <span class="nav-icon">↓</span>
+                <span>Purchase Journal</span>
+            </a>
+
+            <a href="sales-journal.html" class="nav-link">
+                <span class="nav-icon">↑</span>
+                <span>Sales Journal</span>
+            </a>
+
+            <a href="supplier.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Supplier</span>
+            </a>
+
+            <a href="customer.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Customer</span>
+            </a>
+
+            <a href="administrator.html" class="nav-link">
+                <span class="nav-icon">⚙</span>
+                <span>Administrator</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <p>Account System</p>
+
+            <small>Version 1.0</small>
+
+        </div>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>Dashboard</h1>
+
+                <p>
+                    Overview of your accounting system
+                </p>
+
+            </div>
+
+
+            <div class="admin-profile">
+
+                <div class="admin-avatar">
+                    AD
+                </div>
+
+                <div>
+
+                    <strong>
+                        Administrator
+                    </strong>
+
+                    <span>
+                        System Admin
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="dashboard-cards">
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>Total Sales</span>
+
+                    <div class="stat-icon">
+                        ₱
+                    </div>
+
+                </div>
+
+                <h2 id="dashboardTotalSales">
+                    ₱0.00
+                </h2>
+
+                <p id="dashboardSalesCount">
+                    0 sales transactions
+                </p>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>Total Purchases</span>
+
+                    <div class="stat-icon">
+                        ↓
+                    </div>
+
+                </div>
+
+                <h2 id="dashboardTotalPurchases">
+                    ₱0.00
+                </h2>
+
+                <p id="dashboardPurchaseCount">
+                    0 purchase transactions
+                </p>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>Customers</span>
+
+                    <div class="stat-icon">
+                        C
+                    </div>
+
+                </div>
+
+                <h2 id="dashboardCustomerCount">
+                    0
+                </h2>
+
+                <p>
+                    Registered customers
+                </p>
+
+            </article>
+
+
+            <article class="stat-card">
+
+                <div class="stat-header">
+
+                    <span>Suppliers</span>
+
+                    <div class="stat-icon">
+                        S
+                    </div>
+
+                </div>
+
+                <h2 id="dashboardSupplierCount">
+                    0
+                </h2>
+
+                <p>
+                    Registered suppliers
+                </p>
+
+            </article>
+
+        </section>
+
+
+        <section class="dashboard-grid">
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Recent Transactions
+                        </h2>
+
+                        <p>
+                            Latest sales and purchase transactions
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="secondary-btn"
+                        id="dashboardRefreshBtn"
+                    >
+                        Refresh
+                    </button>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Date</th>
+
+                                <th>Reference</th>
+
+                                <th>Type</th>
+
+                                <th>Account</th>
+
+                                <th>Amount</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="transactionTable">
+
+                            <tr class="empty-row">
+
+                                <td colspan="5">
+                                    Loading transactions...
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h2>
+                            Quick Actions
+                        </h2>
+
+                        <p>
+                            Frequently used functions
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="quick-actions">
+
+                    <a href="sales-journal.html" class="action-card">
+
+                        <span>＋</span>
+
+                        <div>
+
+                            <strong>
+                                New Sale
+                            </strong>
+
+                            <small>
+                                Create sales transaction
+                            </small>
+
+                        </div>
+
+                    </a>
+
+
+                    <a href="purchase-journal.html" class="action-card">
+
+                        <span>＋</span>
+
+                        <div>
+
+                            <strong>
+                                New Purchase
+                            </strong>
+
+                            <small>
+                                Create purchase transaction
+                            </small>
+
+                        </div>
+
+                    </a>
+
+
+                    <a href="customer.html" class="action-card">
+
+                        <span>＋</span>
+
+                        <div>
+
+                            <strong>
+                                Add Customer
+                            </strong>
+
+                            <small>
+                                Register new customer
+                            </small>
+
+                        </div>
+
+                    </a>
+
+
+                    <a href="supplier.html" class="action-card">
+
+                        <span>＋</span>
+
+                        <div>
+
+                            <strong>
+                                Add Supplier
+                            </strong>
+
+                            <small>
+                                Register new supplier
+                            </small>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

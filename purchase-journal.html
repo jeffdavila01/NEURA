@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Purchase Journal | FINIQ</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/neura.png">
+
+    <script src="js/app.js" defer></script>
+    <script src="js/excel-system.js" defer></script>
+    <script src="js/excel-modules.js" defer></script>
+    <script src="js/baseline-hover.js" defer></script>
+</head>
+
+
+<body class="purchase-journal-page">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <img src="images/neura.png" alt="NEURA Logo">
+            </div>
+
+            <div>
+                <h2>NEURA</h2>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="index.html" class="nav-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+
+            <a href="chart-of-accounts.html" class="nav-link">
+                <span class="nav-icon">▤</span>
+                <span>Chart of Accounts</span>
+            </a>
+
+
+            <a href="purchase-journal.html" class="nav-link active">
+                <span class="nav-icon">↓</span>
+                <span>Purchase Journal</span>
+            </a>
+
+
+            <a href="sales-journal.html" class="nav-link">
+                <span class="nav-icon">↑</span>
+                <span>Sales Journal</span>
+            </a>
+
+
+            <a href="supplier.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Supplier</span>
+            </a>
+
+
+            <a href="customer.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Customer</span>
+            </a>
+
+
+            <a href="administrator.html" class="nav-link">
+                <span class="nav-icon">⚙</span>
+                <span>Administrator</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <p>Account System</p>
+
+            <small>Version 1.0</small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             HEADER
+        ================================================== -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>Purchase Journal</h1>
+
+                <p>
+                    Record and manage purchase transactions
+                </p>
+
+            </div>
+
+
+            <div class="admin-profile">
+
+                <div class="admin-avatar">
+                    AD
+                </div>
+
+                <div>
+
+                    <strong>
+                        Administrator
+                    </strong>
+
+                    <span>
+                        System Admin
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             CREATE BATCH BUTTON
+        ================================================== -->
+
+        <section class="purchase-toolbar">
+
+            <button type="button" id="showBatchFormBtn" class="primary-btn">
+                + Create Batch
+            </button>
+
+            <button type="button" id="showPurchaseJournalFormBtn" class="primary-btn" aria-expanded="false">
+                + Create Journal Entry
+            </button>
+
+        </section>
+
+
+        <!-- =================================================
+             CREATE BATCH
+        ================================================== -->
+
+        <section class="panel purchase-batch-panel" id="batchFormPanel" hidden>
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>Create Batch</h2>
+
+                    <p>
+                        Create a batch for purchase journal entries.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form id="purchaseBatchForm" class="purchase-batch-form">
+
+                <div class="form-group">
+
+                    <label for="batchCode">
+                        Batch Code
+                    </label>
+
+                    <input type="text" id="batchCode" maxlength="20" placeholder="PUR" required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="batchName">
+                        Batch Name
+                    </label>
+
+                    <input type="text" id="batchName" maxlength="100" placeholder="PURCHASES" required>
+
+                </div>
+
+
+                <div class="form-submit">
+
+                    <button type="submit" class="primary-btn">
+                        Submit
+                    </button>
+
+                    <button type="button" class="secondary-btn" id="cancelBatchFormBtn">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- =================================================
+             BATCH LIST
+        ================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>Purchase Batches</h2>
+
+                    <p>
+                        Select the batch to use for the journal entry.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Batch Code
+                            </th>
+
+                            <th>
+                                Batch Name
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="purchaseBatchTableBody">
+
+                        <tr class="empty-row">
+
+                            <td colspan="3">
+                                Loading batches...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             JOURNAL ENTRY
+        ================================================== -->
+
+        <section class="panel purchase-entry-panel" id="purchaseJournalFormPanel" hidden>
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>Entry</h2>
+
+                    <p>
+                        Record a new purchase journal entry.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form id="purchaseEntryForm">
+
+
+                <!-- =========================================
+                     BATCH
+                ========================================== -->
+
+                <div class="purchase-entry-header">
+
+                    <div class="form-group">
+
+                        <label for="purchaseBatch">
+                            Batch
+                        </label>
+
+                        <select id="purchaseBatch" required>
+
+                            <option value="">
+                                Select Batch
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="purchaseDate">
+                            Date
+                        </label>
+
+                        <input type="date" id="purchaseDate" required>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="purchaseDocumentNo">
+                            Doc No.
+                        </label>
+
+                        <input type="text" id="purchaseDocumentNo" placeholder="PUR-0001" required>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="purchasePayee">
+                            Supplier / Payee
+                        </label>
+
+                        <select id="purchasePayee" required>
+
+                            <option value="">
+                                Select Supplier
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     ENTRY TABLE
+                ========================================== -->
+
+                <div class="table-container purchase-entry-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Debit Account Title
+                                </th>
+
+                                <th>
+                                    Debit Amount
+                                </th>
+
+                                <th>
+                                    Credit Account Title
+                                </th>
+
+                                <th>
+                                    Credit Amount
+                                </th>
+
+                                <th>
+                                    Particulars
+                                </th>
+
+                                <th>
+                                    Business Activity
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <tr>
+
+                                <!-- DEBIT ACCOUNT -->
+
+                                <td>
+
+                                    <select id="purchaseDebitAccount" required>
+
+                                        <option value="">
+                                            Select Account
+                                        </option>
+
+                                    </select>
+
+                                </td>
+
+
+                                <!-- DEBIT AMOUNT -->
+
+                                <td>
+
+                                    <input type="number" id="purchaseDebitAmount" min="0" step="0.01" placeholder="0.00"
+                                        required>
+
+                                </td>
+
+
+                                <!-- CREDIT ACCOUNT -->
+
+                                <td>
+
+                                    <select id="purchaseCreditAccount" required>
+
+                                        <option value="">
+                                            Select Account
+                                        </option>
+
+                                    </select>
+
+                                </td>
+
+
+                                <!-- CREDIT AMOUNT -->
+
+                                <td>
+
+                                    <input type="number" id="purchaseCreditAmount" min="0" step="0.01"
+                                        placeholder="0.00" required>
+
+                                </td>
+
+
+                                <!-- PARTICULARS -->
+
+                                <td>
+
+                                    <input type="text" id="purchaseParticulars" placeholder="Description">
+
+                                </td>
+
+
+                                <!-- BUSINESS ACTIVITY -->
+
+                                <td>
+
+                                    <input type="text" id="purchaseBusinessActivity" placeholder="Business Activity">
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- =========================================
+                     TOTALS
+                ========================================== -->
+
+                <div class="purchase-summary">
+
+                    <div>
+
+                        <span>
+                            Total Debit
+                        </span>
+
+                        <strong id="purchaseDebitTotal">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Total Credit
+                        </span>
+
+                        <strong id="purchaseCreditTotal">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Difference
+                        </span>
+
+                        <strong id="purchaseDifference">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     BUTTON
+                ========================================== -->
+
+                <div class="purchase-entry-actions">
+
+                    <button type="submit" class="primary-btn">
+                        Post Entry
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- =================================================
+             PURCHASE JOURNAL HISTORY
+        ================================================== -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>Purchase Journal History</h2>
+
+                    <p>
+                        Posted purchase transactions
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Date</th>
+
+                            <th>Doc No.</th>
+
+                            <th>Payee</th>
+
+                            <th>Debit Account</th>
+
+                            <th>Debit</th>
+
+                            <th>Credit Account</th>
+
+                            <th>Credit</th>
+
+                            <th>Particulars</th>
+
+                            <th>Business Activity</th>
+
+                            <th>Status</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="purchaseJournalTableBody">
+
+                        <tr class="empty-row">
+
+                            <td colspan="11">
+                                No purchase journal entries.
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

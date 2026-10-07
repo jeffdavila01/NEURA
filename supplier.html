@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Suppliers | NEURA
+    </title>
+
+    <link rel="icon" type="image/png" href="images/neura.png">
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/app.js" defer></script>
+    <script src="js/excel-system.js" defer></script>
+    <script src="js/excel-modules.js" defer></script>
+    <script src="js/baseline-hover.js" defer></script>
+
+</head>
+
+
+<body class="supplier-page">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <img src="images/neura.png" alt="NEURA Logo">
+            </div>
+
+            <div>
+                <h2>NEURA</h2>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="index.html" class="nav-link">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="chart-of-accounts.html" class="nav-link">
+                <span class="nav-icon">▤</span>
+                <span>Chart of Accounts</span>
+            </a>
+
+            <a href="purchase-journal.html" class="nav-link">
+                <span class="nav-icon">↓</span>
+                <span>Purchase Journal</span>
+            </a>
+
+            <a href="sales-journal.html" class="nav-link">
+                <span class="nav-icon">↑</span>
+                <span>Sales Journal</span>
+            </a>
+
+            <a href="supplier.html" class="nav-link active">
+                <span class="nav-icon">♙</span>
+                <span>Supplier</span>
+            </a>
+
+            <a href="customer.html" class="nav-link">
+                <span class="nav-icon">♙</span>
+                <span>Customer</span>
+            </a>
+
+            <a href="administrator.html" class="nav-link">
+                <span class="nav-icon">⚙</span>
+                <span>Administrator</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+            <p>Account System</p>
+            <small>Version 1.0</small>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <h1>Suppliers</h1>
+                <p>Create and manage supplier records</p>
+            </div>
+
+            <div class="admin-profile">
+                <div class="admin-avatar">AD</div>
+
+                <div>
+                    <strong>Administrator</strong>
+                    <span>System Admin</span>
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- SUPPLIER TOOLBAR -->
+
+        <section class="panel supplier-toolbar-panel">
+
+            <div class="supplier-toolbar">
+
+                <button type="button" class="primary-btn" id="toggleSupplierFormBtn">
+                    + Create Supplier
+                </button>
+
+                <div class="supplier-toolbar-right">
+
+                    <button type="button" class="secondary-btn" id="importSupplierBtn">
+                        Import CSV
+                    </button>
+
+                    <button type="button" class="secondary-btn" id="exportSupplierBtn">
+                        Export CSV
+                    </button>
+
+                    <input type="file" id="supplierImportFile" accept=".csv" hidden>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CREATE SUPPLIER FORM -->
+        <!-- hidden by default -->
+
+        <section class="panel supplier-form-panel" id="supplierFormPanel" hidden>
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Create Supplier</h2>
+                    <p>Add supplier information manually.</p>
+                </div>
+
+            </div>
+
+
+            <form id="supplierForm" class="supplier-form">
+
+                <div class="
+                        form-group
+                        supplier-code-field
+                    ">
+                    <label for="supplierCode">
+                        Supplier Code
+                    </label>
+
+                    <input type="text" id="supplierCode" name="supplierCode" placeholder="SUP-0001" readonly required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supplierName">
+                        Supplier Name
+                    </label>
+
+                    <input type="text" id="supplierName" name="supplierName" placeholder="ABC Food Supplies"
+                        autocomplete="off" required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supplierTin">
+                        TIN Number
+                    </label>
+
+                    <input type="text" id="supplierTin" name="supplierTin" placeholder="123-456-789-000">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supplierType">
+                        Supplier Type
+                    </label>
+
+                    <input type="text" id="supplierType" name="supplierType" placeholder="Food Supplier">
+                </div>
+
+
+                <div class="
+                        form-group
+                        supplier-wide
+                    ">
+                    <label for="supplierAddress">
+                        Supplier Address
+                    </label>
+
+                    <input type="text" id="supplierAddress" name="supplierAddress"
+                        placeholder="Navotas City, Metro Manila">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supplierContactPerson">
+                        Contact Person
+                    </label>
+
+                    <input type="text" id="supplierContactPerson" name="supplierContactPerson"
+                        placeholder="Juan Dela Cruz">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supplierContactNumber">
+                        Contact Number
+                    </label>
+
+                    <input type="text" id="supplierContactNumber" name="supplierContactNumber"
+                        placeholder="0917-123-4567">
+                </div>
+
+
+                <div class="
+                        form-group
+                        supplier-wide
+                    ">
+                    <label for="supplierEmail">
+                        Email Address
+                    </label>
+
+                    <input type="email" id="supplierEmail" name="supplierEmail" placeholder="supplier@example.com">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supplierPaymentTerms">
+                        Payment Terms
+                    </label>
+
+                    <select id="supplierPaymentTerms" name="supplierPaymentTerms">
+                        <option value="Cash">Cash</option>
+                        <option value="7 Days">7 Days</option>
+                        <option value="15 Days">15 Days</option>
+                        <option value="30 Days">30 Days</option>
+                        <option value="60 Days">60 Days</option>
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="supplierStatus">
+                        Status
+                    </label>
+
+                    <select id="supplierStatus" name="supplierStatus">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+
+
+                <div class="
+                        form-submit
+                        supplier-submit
+                    ">
+
+                    <div class="supplier-form-actions">
+
+                        <button type="submit" class="primary-btn" id="saveSupplierBtn">
+                            Save Supplier
+                        </button>
+
+                        <button type="button" class="secondary-btn" id="cancelSupplierBtn">
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- SUPPLIER LIST -->
+
+        <section class="
+                panel
+                supplier-list-panel
+            ">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>Supplier List</h2>
+                    <p>Registered suppliers</p>
+                </div>
+
+                <div class="supplier-search">
+                    <input type="search" id="supplierSearch" placeholder="Search supplier...">
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table class="supplier-table">
+
+                    <thead>
+                        <tr>
+                            <th>Supplier Code</th>
+                            <th>Supplier Name</th>
+                            <th>TIN</th>
+                            <th>Contact Person</th>
+                            <th>Contact Number</th>
+                            <th>Supplier Type</th>
+                            <th>Payment Terms</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="supplierTableBody">
+
+                        <tr class="empty-row">
+                            <td colspan="9">
+                                Loading suppliers...
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+    <script>
+        const supplierFormPanel =
+            document.getElementById("supplierFormPanel");
+
+        const toggleSupplierFormBtn =
+            document.getElementById("toggleSupplierFormBtn");
+
+        const cancelSupplierBtn =
+            document.getElementById("cancelSupplierBtn");
+
+
+        if (toggleSupplierFormBtn && supplierFormPanel) {
+
+            toggleSupplierFormBtn.addEventListener(
+                "click",
+                function () {
+
+                    supplierFormPanel.hidden =
+                        !supplierFormPanel.hidden;
+
+                    if (supplierFormPanel.hidden) {
+
+                        toggleSupplierFormBtn.textContent =
+                            "+ Create Supplier";
+
+                    } else {
+
+                        toggleSupplierFormBtn.textContent =
+                            "Close Form";
+
+                        supplierFormPanel.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+
+                        const supplierName =
+                            document.getElementById(
+                                "supplierName"
+                            );
+
+                        if (supplierName) {
+
+                            setTimeout(
+                                function () {
+                                    supplierName.focus();
+                                },
+                                200
+                            );
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        if (cancelSupplierBtn && supplierFormPanel) {
+
+            cancelSupplierBtn.addEventListener(
+                "click",
+                function () {
+
+                    supplierFormPanel.hidden = true;
+
+                    if (toggleSupplierFormBtn) {
+
+                        toggleSupplierFormBtn.textContent =
+                            "+ Create Supplier";
+
+                    }
+
+                }
+            );
+
+        }
+    </script>
+</body>
+
+</html>
