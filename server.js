@@ -1342,6 +1342,283 @@ app.post(
     }
 );
 
+/* =========================================================
+   SALES JOURNAL - DOCUMENT NUMBER
+========================================================= */
+
+function getSalesDocumentPrefix(
+    batchCode
+) {
+
+    const numberParts =
+        String(
+            batchCode || ""
+        ).match(
+            /\d+/g
+        );
+
+
+    if (
+        numberParts &&
+        numberParts.length
+    ) {
+
+        const lastNumber =
+            Number(
+                numberParts[
+                    numberParts.length - 1
+                ]
+            );
+
+
+        if (
+            Number.isInteger(
+                lastNumber
+            ) &&
+            lastNumber >= 1 &&
+            lastNumber <= 99
+        ) {
+
+            return String(
+                lastNumber
+            ).padStart(
+                2,
+                "0"
+            );
+
+        }
+
+    }
+
+
+    return "01";
+
+}
+
+
+async function getNextSalesDocumentNumber(
+    db,
+    batchId,
+    knownBatchCode = null
+) {
+
+    let batchCode =
+        knownBatchCode;
+
+
+    if (!batchCode) {
+
+        const [batchRows] =
+            await db.execute(
+                `
+                SELECT
+                    batch_code
+                FROM sales_batches
+                WHERE batch_id = ?
+                LIMIT 1
+                `,
+                [
+                    batchId
+                ]
+            );
+
+
+        if (
+            batchRows.length === 0
+        ) {
+
+            return null;
+
+        }
+
+
+        batchCode =
+            batchRows[0]
+                .batch_code;
+
+    }
+
+
+    const prefix =
+        getSalesDocumentPrefix(
+            batchCode
+        );
+
+
+    const [rows] =
+        await db.execute(
+            `
+            SELECT
+                document_no
+            FROM sales_journal_entries
+            WHERE batch_id = ?
+            `,
+            [
+                batchId
+            ]
+        );
+
+
+    let highestNumber =
+        0;
+
+
+    const pattern =
+        new RegExp(
+            `^${prefix}-(\\d{4})$`
+        );
+
+
+    rows.forEach(
+        row => {
+
+            const match =
+                String(
+                    row.document_no ||
+                    ""
+                ).match(
+                    pattern
+                );
+
+
+            if (!match) {
+
+                return;
+
+            }
+
+
+            const number =
+                Number(
+                    match[1]
+                );
+
+
+            if (
+                Number.isInteger(
+                    number
+                ) &&
+                number >
+                    highestNumber
+            ) {
+
+                highestNumber =
+                    number;
+
+            }
+
+        }
+    );
+
+
+    return (
+        `${prefix}-${String(
+            highestNumber + 1
+        ).padStart(
+            4,
+            "0"
+        )}`
+    );
+
+}
+
+
+/* =========================================================
+   SALES JOURNAL - NEXT DOCUMENT
+========================================================= */
+
+app.get(
+    "/api/sales-journal/next-document/:batchId",
+    async (req, res) => {
+
+        try {
+
+            const batchId =
+                Number(
+                    req.params.batchId
+                );
+
+
+            if (
+                !Number.isInteger(
+                    batchId
+                ) ||
+                batchId <= 0
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "Invalid Sales Batch."
+
+                    });
+
+            }
+
+
+            const documentNo =
+                await getNextSalesDocumentNumber(
+                    pool,
+                    batchId
+                );
+
+
+            if (!documentNo) {
+
+                return res
+                    .status(404)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "Sales Batch not found."
+
+                    });
+
+            }
+
+
+            res.json({
+
+                success:
+                    true,
+
+                document_no:
+                    documentNo
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                "NEXT SALES DOCUMENT ERROR:",
+                error
+            );
+
+
+            res.status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Unable to generate Sales document number."
+
+                });
+
+        }
+
+    }
+);
 
 /* =========================================================
    SALES JOURNAL - GET
@@ -1356,6 +1633,7 @@ app.get(
             const [entries] =
                 await pool.execute(`
                     SELECT
+
                         sje.entry_id,
 
                         DATE_FORMAT(
@@ -1364,14 +1642,26 @@ app.get(
                         ) AS entry_date,
 
                         sje.document_no,
+
                         sje.customer_name,
-                        sje.particulars,
-                        sje.business_activity,
+
+                        COALESCE(
+                            sjl.particulars,
+                            sje.particulars
+                        ) AS particulars,
+
+                        COALESCE(
+                            sjl.business_activity,
+                            sje.business_activity
+                        ) AS business_activity,
+
                         sje.status,
 
                         sb.batch_id,
                         sb.batch_code,
                         sb.batch_name,
+
+                        sjl.line_id,
 
                         sjl.debit_amount,
                         sjl.credit_amount,
@@ -1404,23 +1694,30 @@ app.get(
                         ON sjl.entry_id =
                             sje.entry_id
 
-                    INNER JOIN chart_of_accounts da
+                    LEFT JOIN chart_of_accounts da
                         ON da.account_id =
                             sjl.debit_account_id
 
-                    INNER JOIN chart_of_accounts ca
+                    LEFT JOIN chart_of_accounts ca
                         ON ca.account_id =
                             sjl.credit_account_id
 
                     ORDER BY
                         sje.entry_date DESC,
-                        sje.entry_id DESC
+                        sje.entry_id DESC,
+                        sjl.line_id ASC
                 `);
 
+
             res.json({
-                success: true,
+
+                success:
+                    true,
+
                 entries
+
             });
+
 
         } catch (error) {
 
@@ -1429,11 +1726,17 @@ app.get(
                 error
             );
 
-            res.status(500).json({
-                success: false,
-                message:
-                    "Unable to retrieve sales journal entries."
-            });
+
+            res.status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Unable to retrieve sales journal entries."
+
+                });
 
         }
 
@@ -1443,6 +1746,7 @@ app.get(
 
 /* =========================================================
    SALES JOURNAL - POST
+   MULTI-LINE JOURNAL
 ========================================================= */
 
 app.post(
@@ -1451,289 +1755,953 @@ app.post(
 
         let connection;
 
+
         try {
 
             const {
+
                 batch_id,
+
                 entry_date,
+
                 document_no,
+
                 customer_name,
-                debit_account_id,
-                debit_amount,
-                credit_account_id,
-                credit_amount,
-                particulars,
-                business_activity
-            } = req.body;
+
+                lines
+
+            } =
+                req.body;
+
 
             const batchId =
-                Number(batch_id);
+                Number(
+                    batch_id
+                );
 
-            const debitAccountId =
-                Number(debit_account_id);
 
-            const creditAccountId =
-                Number(credit_account_id);
-
-            const debitAmount =
-                Number(debit_amount);
-
-            const creditAmount =
-                Number(credit_amount);
+            /* =================================================
+               HEADER VALIDATION
+            ================================================= */
 
             if (
-                !Number.isInteger(batchId) ||
+                !Number.isInteger(
+                    batchId
+                ) ||
                 batchId <= 0 ||
                 !entry_date ||
                 !String(
-                    document_no || ""
+                    document_no ||
+                    ""
                 ).trim() ||
                 !String(
-                    customer_name || ""
-                ).trim() ||
-                !Number.isInteger(
-                    debitAccountId
-                ) ||
-                debitAccountId <= 0 ||
-                !Number.isInteger(
-                    creditAccountId
-                ) ||
-                creditAccountId <= 0
+                    customer_name ||
+                    ""
+                ).trim()
             ) {
 
-                return res.status(400).json({
-                    success: false,
-                    message:
-                        "Please complete all required sales entry fields."
-                });
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "Please complete Date, Document No., and Payee."
+
+                    });
 
             }
+
+
+            /* =================================================
+               SUPPORT NEW MULTI-LINE FORMAT
+               + OLD SINGLE-LINE FORMAT
+            ================================================= */
+
+            let rawLines;
+
 
             if (
-                !Number.isFinite(
-                    debitAmount
-                ) ||
-                !Number.isFinite(
-                    creditAmount
-                ) ||
-                debitAmount <= 0 ||
-                creditAmount <= 0
+                Array.isArray(
+                    lines
+                )
             ) {
 
-                return res.status(400).json({
-                    success: false,
-                    message:
-                        "Debit and Credit amounts must be greater than zero."
-                });
+                rawLines =
+                    lines;
+
+            } else {
+
+                rawLines = [
+
+                    {
+
+                        debit_account_id:
+                            req.body
+                                .debit_account_id,
+
+                        debit_amount:
+                            req.body
+                                .debit_amount,
+
+                        credit_account_id:
+                            req.body
+                                .credit_account_id,
+
+                        credit_amount:
+                            req.body
+                                .credit_amount,
+
+                        particulars:
+                            req.body
+                                .particulars,
+
+                        business_activity:
+                            req.body
+                                .business_activity
+
+                    }
+
+                ];
 
             }
+
+
+            const journalLines =
+                rawLines
+                    .map(
+                        line => {
+
+                            const debitIdRaw =
+                                line
+                                    .debit_account_id;
+
+                            const creditIdRaw =
+                                line
+                                    .credit_account_id;
+
+
+                            return {
+
+                                debit_account_id:
+                                    debitIdRaw === null ||
+                                    debitIdRaw === undefined ||
+                                    debitIdRaw === ""
+                                        ? null
+                                        : Number(
+                                            debitIdRaw
+                                        ),
+
+                                debit_amount:
+                                    Number(
+                                        line
+                                            .debit_amount
+                                    ) || 0,
+
+                                credit_account_id:
+                                    creditIdRaw === null ||
+                                    creditIdRaw === undefined ||
+                                    creditIdRaw === ""
+                                        ? null
+                                        : Number(
+                                            creditIdRaw
+                                        ),
+
+                                credit_amount:
+                                    Number(
+                                        line
+                                            .credit_amount
+                                    ) || 0,
+
+                                particulars:
+                                    String(
+                                        line
+                                            .particulars ||
+                                        ""
+                                    ).trim(),
+
+                                business_activity:
+                                    String(
+                                        line
+                                            .business_activity ||
+                                        ""
+                                    ).trim()
+
+                            };
+
+                        }
+                    )
+                    .filter(
+                        line =>
+
+                            line
+                                .debit_account_id !==
+                                null ||
+
+                            line
+                                .credit_account_id !==
+                                null ||
+
+                            line
+                                .debit_amount !==
+                                0 ||
+
+                            line
+                                .credit_amount !==
+                                0 ||
+
+                            line
+                                .particulars ||
+
+                            line
+                                .business_activity
+
+                    );
+
 
             if (
-                debitAccountId ===
-                creditAccountId
+                journalLines.length ===
+                0
             ) {
 
-                return res.status(400).json({
-                    success: false,
-                    message:
-                        "Debit and Credit accounts must be different."
-                });
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "Please enter at least one journal row."
+
+                    });
 
             }
+
+
+            /* =================================================
+               LINE VALIDATION
+            ================================================= */
+
+            let totalDebit =
+                0;
+
+            let totalCredit =
+                0;
+
+
+            for (
+                let index = 0;
+                index <
+                    journalLines.length;
+                index++
+            ) {
+
+                const line =
+                    journalLines[index];
+
+
+                if (
+                    line.debit_amount < 0 ||
+                    line.credit_amount < 0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success:
+                                false,
+
+                            message:
+                                `Row ${index + 1}: Amount cannot be negative.`
+
+                        });
+
+                }
+
+
+                if (
+                    line.debit_amount >
+                    0
+                ) {
+
+                    if (
+                        !Number.isInteger(
+                            line
+                                .debit_account_id
+                        ) ||
+                        line
+                            .debit_account_id <=
+                            0
+                    ) {
+
+                        return res
+                            .status(400)
+                            .json({
+
+                                success:
+                                    false,
+
+                                message:
+                                    `Row ${index + 1}: Select a Debit Account.`
+
+                            });
+
+                    }
+
+                }
+
+
+                if (
+                    line.debit_account_id &&
+                    line.debit_amount <= 0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success:
+                                false,
+
+                            message:
+                                `Row ${index + 1}: Debit Amount is required.`
+
+                        });
+
+                }
+
+
+                if (
+                    line.credit_amount >
+                    0
+                ) {
+
+                    if (
+                        !Number.isInteger(
+                            line
+                                .credit_account_id
+                        ) ||
+                        line
+                            .credit_account_id <=
+                            0
+                    ) {
+
+                        return res
+                            .status(400)
+                            .json({
+
+                                success:
+                                    false,
+
+                                message:
+                                    `Row ${index + 1}: Select a Credit Account.`
+
+                            });
+
+                    }
+
+                }
+
+
+                if (
+                    line.credit_account_id &&
+                    line.credit_amount <= 0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success:
+                                false,
+
+                            message:
+                                `Row ${index + 1}: Credit Amount is required.`
+
+                        });
+
+                }
+
+
+                if (
+                    line.debit_amount <= 0 &&
+                    line.credit_amount <= 0
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success:
+                                false,
+
+                            message:
+                                `Row ${index + 1}: Enter a Debit or Credit Amount.`
+
+                        });
+
+                }
+
+
+                if (
+                    line
+                        .debit_account_id &&
+                    line
+                        .credit_account_id &&
+                    line
+                        .debit_account_id ===
+                    line
+                        .credit_account_id
+                ) {
+
+                    return res
+                        .status(400)
+                        .json({
+
+                            success:
+                                false,
+
+                            message:
+                                `Row ${index + 1}: Debit and Credit Account cannot be the same.`
+
+                        });
+
+                }
+
+
+                totalDebit +=
+                    line.debit_amount;
+
+                totalCredit +=
+                    line.credit_amount;
+
+            }
+
+
+            /* =================================================
+               BALANCE CHECK
+            ================================================= */
+
+            if (
+                totalDebit <= 0 ||
+                totalCredit <= 0
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "Debit and Credit totals must be greater than zero."
+
+                    });
+
+            }
+
 
             if (
                 Math.abs(
-                    debitAmount -
-                    creditAmount
-                ) >= 0.005
+                    totalDebit -
+                    totalCredit
+                ) >=
+                0.005
             ) {
 
-                return res.status(400).json({
-                    success: false,
-                    message:
-                        "Total Debit must equal Total Credit."
-                });
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "Total Debit must equal Total Credit."
+
+                    });
 
             }
+
+
+            /* =================================================
+               START TRANSACTION
+            ================================================= */
 
             connection =
-                await pool.getConnection();
+                await pool
+                    .getConnection();
 
-            await connection.beginTransaction();
+
+            await connection
+                .beginTransaction();
+
+
+            /* =================================================
+               LOCK BATCH
+
+               This prevents two document numbers being
+               created at the same time.
+            ================================================= */
 
             const [batchRows] =
-                await connection.execute(
-                    `
-                    SELECT batch_id
-                    FROM sales_batches
-                    WHERE batch_id = ?
-                    LIMIT 1
-                    `,
-                    [batchId]
-                );
+                await connection
+                    .execute(
+                        `
+                        SELECT
+                            batch_id,
+                            batch_code
+                        FROM sales_batches
+                        WHERE batch_id = ?
+                        FOR UPDATE
+                        `,
+                        [
+                            batchId
+                        ]
+                    );
+
 
             if (
-                batchRows.length === 0
+                batchRows.length ===
+                0
             ) {
 
-                await connection.rollback();
+                await connection
+                    .rollback();
 
-                return res.status(404).json({
-                    success: false,
-                    message:
-                        "Sales batch not found."
-                });
+
+                return res
+                    .status(404)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "Sales Batch not found."
+
+                    });
 
             }
 
-            const [accountRows] =
-                await connection.execute(
-                    `
-                    SELECT account_id
-                    FROM chart_of_accounts
-                    WHERE account_id IN (?, ?)
-                    `,
-                    [
-                        debitAccountId,
-                        creditAccountId
-                    ]
+
+            /* =================================================
+               VERIFY DOCUMENT NUMBER
+
+               Example:
+               Server expects 01-0001.
+
+               Frontend cannot send 01-0002 until
+               01-0001 already exists in MySQL.
+            ================================================= */
+
+            const expectedDocumentNo =
+                await getNextSalesDocumentNumber(
+                    connection,
+                    batchId,
+                    batchRows[0]
+                        .batch_code
                 );
 
-            const validAccountIds =
+
+            if (
+                String(
+                    document_no
+                ).trim() !==
+                expectedDocumentNo
+            ) {
+
+                await connection
+                    .rollback();
+
+
+                return res
+                    .status(409)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            `Current active document is ${expectedDocumentNo}. Complete it first.`,
+
+                        document_no:
+                            expectedDocumentNo
+
+                    });
+
+            }
+
+
+            /* =================================================
+               CHECK ALL ACCOUNT IDS
+            ================================================= */
+
+            const accountIds =
+                Array.from(
+                    new Set(
+
+                        journalLines
+                            .flatMap(
+                                line => [
+
+                                    line
+                                        .debit_account_id,
+
+                                    line
+                                        .credit_account_id
+
+                                ]
+                            )
+                            .filter(
+                                id =>
+                                    Number.isInteger(
+                                        id
+                                    ) &&
+                                    id > 0
+                            )
+
+                    )
+                );
+
+
+            if (
+                accountIds.length ===
+                0
+            ) {
+
+                await connection
+                    .rollback();
+
+
+                return res
+                    .status(400)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "No valid accounts were selected."
+
+                    });
+
+            }
+
+
+            const placeholders =
+                accountIds
+                    .map(
+                        () => "?"
+                    )
+                    .join(
+                        ", "
+                    );
+
+
+            const [accountRows] =
+                await connection
+                    .execute(
+                        `
+                        SELECT
+                            account_id
+                        FROM chart_of_accounts
+                        WHERE account_id IN (${placeholders})
+                        `,
+                        accountIds
+                    );
+
+
+            const validIds =
                 new Set(
                     accountRows.map(
                         row =>
                             Number(
-                                row.account_id
+                                row
+                                    .account_id
                             )
                     )
                 );
 
+
+            const hasInvalidAccount =
+                accountIds.some(
+                    id =>
+                        !validIds.has(
+                            id
+                        )
+                );
+
+
             if (
-                !validAccountIds.has(
-                    debitAccountId
-                ) ||
-                !validAccountIds.has(
-                    creditAccountId
-                )
+                hasInvalidAccount
             ) {
 
-                await connection.rollback();
+                await connection
+                    .rollback();
 
-                return res.status(404).json({
-                    success: false,
-                    message:
-                        "One or more selected accounts do not exist."
-                });
+
+                return res
+                    .status(404)
+                    .json({
+
+                        success:
+                            false,
+
+                        message:
+                            "One or more selected accounts do not exist."
+
+                    });
 
             }
 
+
+            /* =================================================
+               ENTRY HEADER
+
+               Keep first particulars/activity in header
+               for backward compatibility.
+            ================================================= */
+
+            const firstParticulars =
+                journalLines.find(
+                    line =>
+                        line.particulars
+                )
+                    ?.particulars ||
+                null;
+
+
+            const firstBusinessActivity =
+                journalLines.find(
+                    line =>
+                        line.business_activity
+                )
+                    ?.business_activity ||
+                null;
+
+
             const [entryResult] =
-                await connection.execute(
-                    `
-                    INSERT INTO
-                        sales_journal_entries
-                    (
-                        batch_id,
-                        entry_date,
-                        document_no,
-                        customer_name,
-                        particulars,
-                        business_activity,
-                        status
-                    )
-                    VALUES
-                    (
-                        ?,
-                        ?,
-                        ?,
-                        ?,
-                        ?,
-                        ?,
-                        'Posted'
-                    )
-                    `,
-                    [
-                        batchId,
-                        entry_date,
-                        String(
-                            document_no
-                        ).trim(),
-                        String(
-                            customer_name
-                        ).trim(),
-                        String(
-                            particulars || ""
-                        ).trim() || null,
-                        String(
-                            business_activity ||
-                            ""
-                        ).trim() || null
-                    ]
+                await connection
+                    .execute(
+                        `
+                        INSERT INTO
+                            sales_journal_entries
+                        (
+                            batch_id,
+                            entry_date,
+                            document_no,
+                            customer_name,
+                            particulars,
+                            business_activity,
+                            status
+                        )
+                        VALUES
+                        (
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            'Posted'
+                        )
+                        `,
+                        [
+
+                            batchId,
+
+                            entry_date,
+
+                            String(
+                                document_no
+                            ).trim(),
+
+                            String(
+                                customer_name
+                            ).trim(),
+
+                            firstParticulars,
+
+                            firstBusinessActivity
+
+                        ]
+                    );
+
+
+            /* =================================================
+               INSERT EVERY JOURNAL ROW
+            ================================================= */
+
+            for (
+                const line
+                of journalLines
+            ) {
+
+                await connection
+                    .execute(
+                        `
+                        INSERT INTO
+                            sales_journal_lines
+                        (
+                            entry_id,
+
+                            debit_account_id,
+                            debit_amount,
+
+                            credit_account_id,
+                            credit_amount,
+
+                            particulars,
+                            business_activity
+                        )
+
+                        VALUES
+                        (
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            ?,
+                            ?
+                        )
+                        `,
+                        [
+
+                            entryResult
+                                .insertId,
+
+                            line
+                                .debit_account_id,
+
+                            line
+                                .debit_amount,
+
+                            line
+                                .credit_account_id,
+
+                            line
+                                .credit_amount,
+
+                            line
+                                .particulars ||
+                                null,
+
+                            line
+                                .business_activity ||
+                                null
+
+                        ]
+                    );
+
+            }
+
+
+            /* =================================================
+               NEXT DOCUMENT
+
+               Only calculated AFTER current document
+               has been inserted.
+            ================================================= */
+
+            const nextDocument =
+                await getNextSalesDocumentNumber(
+                    connection,
+                    batchId,
+                    batchRows[0]
+                        .batch_code
                 );
 
-            await connection.execute(
-                `
-                INSERT INTO
-                    sales_journal_lines
-                (
-                    entry_id,
-                    debit_account_id,
-                    debit_amount,
-                    credit_account_id,
-                    credit_amount
-                )
-                VALUES (?, ?, ?, ?, ?)
-                `,
-                [
-                    entryResult.insertId,
-                    debitAccountId,
-                    debitAmount,
-                    creditAccountId,
-                    creditAmount
-                ]
-            );
 
-            await connection.commit();
+            await connection
+                .commit();
 
-            res.status(201).json({
-                success: true,
-                message:
-                    "Sales journal entry posted successfully.",
-                entry_id:
-                    entryResult.insertId
-            });
+
+            res.status(201)
+                .json({
+
+                    success:
+                        true,
+
+                    message:
+                        `${expectedDocumentNo} posted successfully.`,
+
+                    entry_id:
+                        entryResult
+                            .insertId,
+
+                    document_no:
+                        expectedDocumentNo,
+
+                    next_document:
+                        nextDocument,
+
+                    total_debit:
+                        totalDebit,
+
+                    total_credit:
+                        totalCredit
+
+                });
+
 
         } catch (error) {
 
-            if (connection) {
+            if (
+                connection
+            ) {
 
                 try {
-                    await connection.rollback();
-                } catch (rollbackError) {
+
+                    await connection
+                        .rollback();
+
+                } catch (
+                    rollbackError
+                ) {
+
                     console.error(
-                        "ROLLBACK ERROR:",
+                        "SALES ROLLBACK ERROR:",
                         rollbackError
                     );
+
                 }
 
             }
+
 
             console.error(
                 "POST SALES JOURNAL ERROR:",
                 error
             );
 
-            res.status(500).json({
-                success: false,
-                message:
-                    "Unable to post sales journal entry."
-            });
+
+            res.status(500)
+                .json({
+
+                    success:
+                        false,
+
+                    message:
+                        "Unable to post Sales Journal."
+
+                });
+
 
         } finally {
 
-            if (connection) {
+            if (
+                connection
+            ) {
+
                 connection.release();
+
             }
 
         }
@@ -2734,67 +3702,272 @@ async function ensureCoreTables() {
 async function ensureSalesJournalTables() {
 
     const statements = [
+
         `
         CREATE TABLE IF NOT EXISTS sales_batches (
+
             batch_id INT NOT NULL AUTO_INCREMENT,
-            batch_code VARCHAR(50) NOT NULL UNIQUE,
-            batch_name VARCHAR(100) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            batch_code VARCHAR(50)
+                NOT NULL UNIQUE,
+
+            batch_name VARCHAR(100)
+                NOT NULL,
+
+            created_at
+                TIMESTAMP
+                DEFAULT CURRENT_TIMESTAMP,
+
             PRIMARY KEY (batch_id)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+        ) ENGINE=InnoDB
+          DEFAULT CHARSET=utf8mb4
         `,
+
 
         `
         CREATE TABLE IF NOT EXISTS sales_journal_entries (
-            entry_id INT NOT NULL AUTO_INCREMENT,
-            batch_id INT NOT NULL,
-            entry_date DATE NOT NULL,
-            document_no VARCHAR(50) NOT NULL,
-            customer_name VARCHAR(150) NOT NULL,
-            particulars VARCHAR(255) DEFAULT NULL,
-            business_activity VARCHAR(255) DEFAULT NULL,
-            status VARCHAR(20) NOT NULL DEFAULT 'Posted',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            entry_id INT
+                NOT NULL
+                AUTO_INCREMENT,
+
+            batch_id INT
+                NOT NULL,
+
+            entry_date DATE
+                NOT NULL,
+
+            document_no VARCHAR(50)
+                NOT NULL,
+
+            customer_name VARCHAR(150)
+                NOT NULL,
+
+            particulars VARCHAR(255)
+                DEFAULT NULL,
+
+            business_activity VARCHAR(255)
+                DEFAULT NULL,
+
+            status VARCHAR(20)
+                NOT NULL
+                DEFAULT 'Posted',
+
+            created_at
+                TIMESTAMP
+                DEFAULT CURRENT_TIMESTAMP,
+
             PRIMARY KEY (entry_id),
-            KEY idx_sales_journal_entries_batch (batch_id),
-            CONSTRAINT fk_sales_journal_entries_batch
-                FOREIGN KEY (batch_id)
-                REFERENCES sales_batches(batch_id)
+
+            KEY
+                idx_sales_journal_entries_batch
+                (batch_id),
+
+            CONSTRAINT
+                fk_sales_journal_entries_batch
+
+                FOREIGN KEY
+                    (batch_id)
+
+                REFERENCES
+                    sales_batches(batch_id)
+
                 ON DELETE RESTRICT
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+        ) ENGINE=InnoDB
+          DEFAULT CHARSET=utf8mb4
         `,
+
 
         `
         CREATE TABLE IF NOT EXISTS sales_journal_lines (
-            line_id INT NOT NULL AUTO_INCREMENT,
-            entry_id INT NOT NULL,
-            debit_account_id INT NOT NULL,
-            debit_amount DECIMAL(15,2) NOT NULL,
-            credit_account_id INT NOT NULL,
-            credit_amount DECIMAL(15,2) NOT NULL,
+
+            line_id INT
+                NOT NULL
+                AUTO_INCREMENT,
+
+            entry_id INT
+                NOT NULL,
+
+            debit_account_id INT
+                NULL,
+
+            debit_amount
+                DECIMAL(15,2)
+                NOT NULL
+                DEFAULT 0.00,
+
+            credit_account_id INT
+                NULL,
+
+            credit_amount
+                DECIMAL(15,2)
+                NOT NULL
+                DEFAULT 0.00,
+
+            particulars
+                VARCHAR(255)
+                DEFAULT NULL,
+
+            business_activity
+                VARCHAR(255)
+                DEFAULT NULL,
+
             PRIMARY KEY (line_id),
-            KEY idx_sales_journal_lines_entry (entry_id),
-            CONSTRAINT fk_sales_journal_lines_entry
-                FOREIGN KEY (entry_id)
-                REFERENCES sales_journal_entries(entry_id)
+
+            KEY
+                idx_sales_journal_lines_entry
+                (entry_id),
+
+            CONSTRAINT
+                fk_sales_journal_lines_entry
+
+                FOREIGN KEY
+                    (entry_id)
+
+                REFERENCES
+                    sales_journal_entries(entry_id)
+
                 ON DELETE CASCADE,
-            CONSTRAINT fk_sales_journal_lines_debit
-                FOREIGN KEY (debit_account_id)
-                REFERENCES chart_of_accounts(account_id)
+
+            CONSTRAINT
+                fk_sales_journal_lines_debit
+
+                FOREIGN KEY
+                    (debit_account_id)
+
+                REFERENCES
+                    chart_of_accounts(account_id)
+
                 ON DELETE RESTRICT,
-            CONSTRAINT fk_sales_journal_lines_credit
-                FOREIGN KEY (credit_account_id)
-                REFERENCES chart_of_accounts(account_id)
+
+            CONSTRAINT
+                fk_sales_journal_lines_credit
+
+                FOREIGN KEY
+                    (credit_account_id)
+
+                REFERENCES
+                    chart_of_accounts(account_id)
+
                 ON DELETE RESTRICT
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+
+        ) ENGINE=InnoDB
+          DEFAULT CHARSET=utf8mb4
         `
+
     ];
 
-    for (const statement of statements) {
-        await pool.execute(statement);
+
+    for (
+        const statement
+        of statements
+    ) {
+
+        await pool.execute(
+            statement
+        );
+
+    }
+
+
+    /* =====================================================
+       UPGRADE EXISTING SALES JOURNAL TABLE
+
+       Existing database already has this table,
+       so CREATE TABLE IF NOT EXISTS alone is not enough.
+    ===================================================== */
+
+    await pool.execute(`
+        ALTER TABLE
+            sales_journal_lines
+
+        MODIFY COLUMN
+            debit_account_id
+            INT NULL,
+
+        MODIFY COLUMN
+            debit_amount
+            DECIMAL(15,2)
+            NOT NULL
+            DEFAULT 0.00,
+
+        MODIFY COLUMN
+            credit_account_id
+            INT NULL,
+
+        MODIFY COLUMN
+            credit_amount
+            DECIMAL(15,2)
+            NOT NULL
+            DEFAULT 0.00
+    `);
+
+
+    /* =====================================================
+       PARTICULARS COLUMN
+    ===================================================== */
+
+    const [particularColumns] =
+        await pool.execute(`
+            SHOW COLUMNS
+            FROM sales_journal_lines
+            LIKE 'particulars'
+        `);
+
+
+    if (
+        particularColumns.length ===
+        0
+    ) {
+
+        await pool.execute(`
+            ALTER TABLE
+                sales_journal_lines
+
+            ADD COLUMN
+                particulars
+                VARCHAR(255)
+                DEFAULT NULL
+                AFTER credit_amount
+        `);
+
+    }
+
+
+    /* =====================================================
+       BUSINESS ACTIVITY COLUMN
+    ===================================================== */
+
+    const [businessColumns] =
+        await pool.execute(`
+            SHOW COLUMNS
+            FROM sales_journal_lines
+            LIKE 'business_activity'
+        `);
+
+
+    if (
+        businessColumns.length ===
+        0
+    ) {
+
+        await pool.execute(`
+            ALTER TABLE
+                sales_journal_lines
+
+            ADD COLUMN
+                business_activity
+                VARCHAR(255)
+                DEFAULT NULL
+                AFTER particulars
+        `);
+
     }
 
 }
+
 
 /* =========================================================
    CUSTOMERS - GET ALL

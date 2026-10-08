@@ -5,24 +5,15 @@
    FILE:
    js/sales-sheet.js
 
-   ACTION:
-   REPLACE ENTIRE FILE
-
-   CURRENT RULE:
-   - Select Batch
-   - Click Proceed
-   - Open Sales Journal popup
-   - One active document only: 01-0001
-   - Add Products
-   - Add Debit / Credit rows
-   - Difference must be 0
-   - Check & Save
-   - Post Entry enabled after validation
-
-   NOTE:
-   Actual multi-line MySQL posting will be connected next.
+   BEHAVIOR:
+   - Multiple editable journal rows
+   - One active document only
+   - 01-0001 stays active until successfully posted
+   - Debit-only and Credit-only rows supported
+   - Total Debit must equal Total Credit
+   - Draft stays in browser until posted
+   - Next document comes from MySQL only after successful POST
 ========================================================= */
-
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -57,11 +48,6 @@ document.addEventListener(
                 "#cancelSalesSheetBtn"
             );
 
-
-        /* =====================================================
-           DOCUMENT INFORMATION
-        ===================================================== */
-
         const salesSheetActiveDocument =
             document.querySelector(
                 "#salesSheetActiveDocument"
@@ -76,51 +62,6 @@ document.addEventListener(
             document.querySelector(
                 "#salesSheetStatus"
             );
-
-        const salesDate =
-            document.querySelector(
-                "#salesDate"
-            );
-
-        const salesDocumentNo =
-            document.querySelector(
-                "#salesDocumentNo"
-            );
-
-        const salesCustomer =
-            document.querySelector(
-                "#salesCustomer"
-            );
-
-        const salesPaymentMethod =
-            document.querySelector(
-                "#salesPaymentMethod"
-            );
-
-
-        /* =====================================================
-           PRODUCTS
-        ===================================================== */
-
-        const salesItemsBody =
-            document.querySelector(
-                "#salesItemsBody"
-            );
-
-        const addSalesItemBtn =
-            document.querySelector(
-                "#addSalesItemBtn"
-            );
-
-        const salesItemsGrandTotal =
-            document.querySelector(
-                "#salesItemsGrandTotal"
-            );
-
-
-        /* =====================================================
-           ACCOUNTING
-        ===================================================== */
 
         const salesAccountingBody =
             document.querySelector(
@@ -152,11 +93,6 @@ document.addEventListener(
                 "#salesBalanceMessage"
             );
 
-
-        /* =====================================================
-           ACTION BUTTONS
-        ===================================================== */
-
         const checkSaveSalesBtn =
             document.querySelector(
                 "#checkSaveSalesBtn"
@@ -168,41 +104,122 @@ document.addEventListener(
             );
 
 
-        /* =====================================================
-           STOP ONLY IF THIS IS NOT SALES JOURNAL PAGE
-        ===================================================== */
-
         if (
             !salesBatch ||
             !salesProceedBtn ||
-            !salesSheetOverlay
+            !salesSheetOverlay ||
+            !salesAccountingBody
         ) {
-
             return;
-
         }
 
 
         /* =====================================================
-           ACTIVE DOCUMENT
-
-           IMPORTANT:
-           01-0001 remains active.
-
-           DO NOT generate 01-0002 until
-           successful real database posting.
+           STATE
         ===================================================== */
 
-        const ACTIVE_DOCUMENT =
-            "01-0001";
+        const DEFAULT_ROW_COUNT = 8;
 
+        let accounts = [];
+
+        let customers = [];
+
+        let referencesLoaded =
+            false;
+
+        let currentBatchId =
+            null;
+
+        let currentDocumentNo =
+            "";
 
         let isCheckedAndSaved =
             false;
 
 
         /* =====================================================
-           FORMAT PESO
+           API HELPER
+        ===================================================== */
+
+        async function fetchJSON(
+            url,
+            options = {}
+        ) {
+
+            const response =
+                await fetch(
+                    url,
+                    options
+                );
+
+
+            let data = {};
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch (error) {
+
+                data = {};
+
+            }
+
+
+            if (
+                !response.ok ||
+                data.success === false
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    `Request failed: ${response.status}`
+                );
+
+            }
+
+
+            return data;
+
+        }
+
+
+        /* =====================================================
+           HTML ESCAPE
+        ===================================================== */
+
+        function escapeHTML(value) {
+
+            return String(
+                value ?? ""
+            )
+                .replaceAll(
+                    "&",
+                    "&amp;"
+                )
+                .replaceAll(
+                    "<",
+                    "&lt;"
+                )
+                .replaceAll(
+                    ">",
+                    "&gt;"
+                )
+                .replaceAll(
+                    '"',
+                    "&quot;"
+                )
+                .replaceAll(
+                    "'",
+                    "&#039;"
+                );
+
+        }
+
+
+        /* =====================================================
+           MONEY
         ===================================================== */
 
         function formatPeso(value) {
@@ -210,17 +227,10 @@ document.addEventListener(
             return new Intl.NumberFormat(
                 "en-PH",
                 {
-                    style:
-                        "currency",
-
-                    currency:
-                        "PHP",
-
-                    minimumFractionDigits:
-                        2,
-
-                    maximumFractionDigits:
-                        2
+                    style: "currency",
+                    currency: "PHP",
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                 }
             ).format(
                 Number(value) || 0
@@ -230,7 +240,7 @@ document.addEventListener(
 
 
         /* =====================================================
-           GET TODAY
+           TODAY
         ===================================================== */
 
         function getToday() {
@@ -257,155 +267,502 @@ document.addEventListener(
                     "0"
                 );
 
-            return (
-                `${year}-${month}-${day}`
-            );
+            return `${year}-${month}-${day}`;
 
         }
 
 
         /* =====================================================
-           RESET SAVED STATUS WHEN USER CHANGES SOMETHING
+           ACCOUNT OPTIONS
         ===================================================== */
 
-        function markChanged() {
+        function getAccountOptions(
+            selectedValue = ""
+        ) {
 
-            if (!isCheckedAndSaved) {
+            const selected =
+                String(
+                    selectedValue || ""
+                );
+
+
+            return `
+
+                <option value="">
+                    Select Account
+                </option>
+
+                ${
+                    accounts
+                        .map(
+                            account => {
+
+                                const value =
+                                    String(
+                                        account.account_id
+                                    );
+
+                                const isSelected =
+                                    value ===
+                                    selected;
+
+                                return `
+
+                                    <option
+                                        value="${escapeHTML(value)}"
+                                        ${isSelected ? "selected" : ""}
+                                    >
+
+                                        ${escapeHTML(account.account_code)}
+                                        -
+                                        ${escapeHTML(account.account_name)}
+
+                                    </option>
+
+                                `;
+
+                            }
+                        )
+                        .join("")
+                }
+
+            `;
+
+        }
+
+
+        /* =====================================================
+           CUSTOMER OPTIONS
+        ===================================================== */
+
+        function getCustomerOptions(
+            selectedValue = ""
+        ) {
+
+            const selected =
+                String(
+                    selectedValue || ""
+                );
+
+
+            return `
+
+                <option value="">
+                    Select Payee
+                </option>
+
+                ${
+                    customers
+                        .filter(
+                            customer =>
+                                customer.status !==
+                                "Inactive"
+                        )
+                        .map(
+                            customer => {
+
+                                const code =
+                                    String(
+                                        customer.customer_code ||
+                                        ""
+                                    );
+
+                                const name =
+                                    String(
+                                        customer.customer_name ||
+                                        ""
+                                    );
+
+                                return `
+
+                                    <option
+                                        value="${escapeHTML(code)}"
+                                        ${code === selected ? "selected" : ""}
+                                    >
+
+                                        ${escapeHTML(code)}
+                                        ${
+                                            name
+                                                ? ` - ${escapeHTML(name)}`
+                                                : ""
+                                        }
+
+                                    </option>
+
+                                `;
+
+                            }
+                        )
+                        .join("")
+                }
+
+            `;
+
+        }
+
+
+        /* =====================================================
+           LOAD CHART OF ACCOUNTS + CUSTOMERS
+        ===================================================== */
+
+        async function loadReferences() {
+
+            if (referencesLoaded) {
 
                 return;
 
             }
 
-            isCheckedAndSaved =
-                false;
 
-            if (salesSheetPostBtn) {
+            const [
+                accountData,
+                customerData
+            ] =
+                await Promise.all(
+                    [
 
-                salesSheetPostBtn.disabled =
-                    true;
+                        fetchJSON(
+                            "/api/accounts",
+                            {
+                                cache:
+                                    "no-store"
+                            }
+                        ),
 
-            }
+                        fetchJSON(
+                            "/api/customers",
+                            {
+                                cache:
+                                    "no-store"
+                            }
+                        )
 
-            if (salesSheetStatus) {
+                    ]
+                );
 
-                salesSheetStatus.textContent =
-                    "Changed - Check Again";
 
-                salesSheetStatus.className =
-                    "is-warning";
+            accounts =
+                accountData.accounts ||
+                [];
 
-            }
+            customers =
+                customerData.customers ||
+                [];
+
+            referencesLoaded =
+                true;
 
         }
 
 
         /* =====================================================
-           GET FIRST ACCOUNT OPTIONS
-
-           app.js loads Chart of Accounts
-           into these first dropdowns.
+           NEXT DOCUMENT
         ===================================================== */
 
-        function getDebitAccountOptions() {
+        async function getNextDocument(
+            batchId
+        ) {
 
-            const firstSelect =
-                document.querySelector(
-                    "#salesDebitAccount"
+            const data =
+                await fetchJSON(
+                    `/api/sales-journal/next-document/${encodeURIComponent(batchId)}`,
+                    {
+                        cache:
+                            "no-store"
+                    }
                 );
 
-            return (
-                firstSelect?.innerHTML ||
-                `
-                    <option value="">
-                        Select Account
-                    </option>
-                `
-            );
 
-        }
-
-
-        function getCreditAccountOptions() {
-
-            const firstSelect =
-                document.querySelector(
-                    "#salesCreditAccount"
-                );
-
-            return (
-                firstSelect?.innerHTML ||
-                `
-                    <option value="">
-                        Select Account
-                    </option>
-                `
+            return String(
+                data.document_no ||
+                ""
             );
 
         }
 
 
         /* =====================================================
-           CREATE PRODUCT ROW
+           CREATE JOURNAL ROW
         ===================================================== */
 
-        function createProductRow() {
+        function createJournalRow(
+            index,
+            data = {}
+        ) {
 
             const row =
                 document.createElement(
                     "tr"
                 );
 
+
             row.className =
-                "sales-item-row";
+                "sales-accounting-row journal-data-row";
 
-            row.innerHTML = `
-                <td>
-                    <input
-                        type="text"
-                        class="sales-item-name"
-                        placeholder="Product or service"
-                    >
-                </td>
 
-                <td>
-                    <input
-                        type="number"
-                        class="sales-item-qty"
-                        min="0"
-                        step="0.01"
-                        placeholder="0"
-                    >
-                </td>
+            const isFirstRow =
+                index === 0;
 
-                <td>
-                    <input
-                        type="number"
-                        class="sales-item-price"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                    >
-                </td>
 
-                <td>
-                    <input
-                        type="text"
-                        class="sales-item-total"
-                        value="₱0.00"
-                        readonly
-                    >
-                </td>
+            const debitAccountId =
+                data.debit_account_id ||
+                "";
 
-                <td>
-                    <button
-                        type="button"
-                        class="sales-remove-row-btn"
-                        title="Remove item"
-                    >
-                        ×
-                    </button>
-                </td>
-            `;
+            const debitAmount =
+                Number(
+                    data.debit_amount
+                ) || 0;
+
+            const creditAccountId =
+                data.credit_account_id ||
+                "";
+
+            const creditAmount =
+                Number(
+                    data.credit_amount
+                ) || 0;
+
+            const particulars =
+                data.particulars ||
+                "";
+
+            const businessActivity =
+                data.business_activity ||
+                "";
+
+
+            if (isFirstRow) {
+
+                row.innerHTML = `
+
+                    <td>
+
+                        <input
+                            type="date"
+                            id="salesDate"
+                            class="journal-cell-input journal-date-input"
+                            value="${escapeHTML(data.entry_date || getToday())}"
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            id="salesDocumentNo"
+                            class="journal-cell-input journal-doc-input"
+                            value="${escapeHTML(currentDocumentNo)}"
+                            readonly
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <select
+                            id="salesCustomer"
+                            class="journal-cell-input journal-payee-input"
+                        >
+
+                            ${getCustomerOptions(data.customer || "")}
+
+                        </select>
+
+                    </td>
+
+
+                    <td>
+
+                        <select
+                            class="sales-debit-account journal-cell-input"
+                        >
+
+                            ${getAccountOptions(debitAccountId)}
+
+                        </select>
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="number"
+                            class="sales-debit-amount journal-cell-input journal-money-input"
+                            min="0"
+                            step="0.01"
+                            value="${debitAmount > 0 ? debitAmount : ""}"
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <select
+                            class="sales-credit-account journal-cell-input"
+                        >
+
+                            ${getAccountOptions(creditAccountId)}
+
+                        </select>
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="number"
+                            class="sales-credit-amount journal-cell-input journal-money-input"
+                            min="0"
+                            step="0.01"
+                            value="${creditAmount > 0 ? creditAmount : ""}"
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            class="sales-particulars journal-cell-input"
+                            value="${escapeHTML(particulars)}"
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            class="sales-business-activity journal-cell-input"
+                            value="${escapeHTML(businessActivity)}"
+                        >
+
+                    </td>
+
+                `;
+
+            } else {
+
+                row.innerHTML = `
+
+                    <td>
+
+                        <input
+                            type="date"
+                            class="journal-cell-input journal-row-date"
+                            readonly
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            class="journal-cell-input journal-row-document"
+                            readonly
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            class="journal-cell-input journal-row-payee"
+                            readonly
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <select
+                            class="sales-debit-account journal-cell-input"
+                        >
+
+                            ${getAccountOptions(debitAccountId)}
+
+                        </select>
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="number"
+                            class="sales-debit-amount journal-cell-input journal-money-input"
+                            min="0"
+                            step="0.01"
+                            value="${debitAmount > 0 ? debitAmount : ""}"
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <select
+                            class="sales-credit-account journal-cell-input"
+                        >
+
+                            ${getAccountOptions(creditAccountId)}
+
+                        </select>
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="number"
+                            class="sales-credit-amount journal-cell-input journal-money-input"
+                            min="0"
+                            step="0.01"
+                            value="${creditAmount > 0 ? creditAmount : ""}"
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            class="sales-particulars journal-cell-input"
+                            value="${escapeHTML(particulars)}"
+                        >
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            class="sales-business-activity journal-cell-input"
+                            value="${escapeHTML(businessActivity)}"
+                        >
+
+                    </td>
+
+                `;
+
+            }
+
 
             return row;
 
@@ -413,322 +770,234 @@ document.addEventListener(
 
 
         /* =====================================================
-           CALCULATE PRODUCT TOTAL
+           SYNC DATE / DOCUMENT / PAYEE TO ALL ROWS
         ===================================================== */
 
-        function updateProductTotals() {
+        function syncHeaderRows() {
 
-            if (
-                !salesItemsBody ||
-                !salesItemsGrandTotal
-            ) {
-
-                return;
-
-            }
-
-            const rows =
-                Array.from(
-                    salesItemsBody.querySelectorAll(
-                        ".sales-item-row"
-                    )
+            const salesDate =
+                document.querySelector(
+                    "#salesDate"
                 );
 
-            let grandTotal =
-                0;
+            const salesDocumentNo =
+                document.querySelector(
+                    "#salesDocumentNo"
+                );
 
-            rows.forEach(
-                row => {
+            const salesCustomer =
+                document.querySelector(
+                    "#salesCustomer"
+                );
 
-                    const quantity =
-                        Number(
-                            row.querySelector(
-                                ".sales-item-qty"
-                            )?.value
-                        ) || 0;
 
-                    const unitPrice =
-                        Number(
-                            row.querySelector(
-                                ".sales-item-price"
-                            )?.value
-                        ) || 0;
+            const date =
+                salesDate?.value ||
+                "";
 
-                    const total =
-                        quantity *
-                        unitPrice;
+            const documentNo =
+                salesDocumentNo?.value ||
+                currentDocumentNo;
 
-                    grandTotal +=
-                        total;
+            const customerCode =
+                salesCustomer?.value ||
+                "";
 
-                    const totalInput =
-                        row.querySelector(
-                            ".sales-item-total"
-                        );
 
-                    if (totalInput) {
+            salesAccountingBody
+                .querySelectorAll(
+                    ".journal-row-date"
+                )
+                .forEach(
+                    input => {
 
-                        totalInput.value =
-                            formatPeso(
-                                total
-                            );
+                        input.value =
+                            date;
 
                     }
-
-                }
-            );
-
-            salesItemsGrandTotal.textContent =
-                formatPeso(
-                    grandTotal
                 );
 
-            markChanged();
 
-        }
-
-
-        /* =====================================================
-           CREATE ACCOUNTING ROW
-        ===================================================== */
-
-        function createAccountingRow() {
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-            row.className =
-                "sales-accounting-row";
-
-            row.innerHTML = `
-                <td>
-                    <select
-                        class="sales-debit-account"
-                    >
-                        ${getDebitAccountOptions()}
-                    </select>
-                </td>
-
-                <td>
-                    <input
-                        type="number"
-                        class="sales-debit-amount"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                    >
-                </td>
-
-                <td>
-                    <select
-                        class="sales-credit-account"
-                    >
-                        ${getCreditAccountOptions()}
-                    </select>
-                </td>
-
-                <td>
-                    <input
-                        type="number"
-                        class="sales-credit-amount"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="text"
-                        class="sales-particulars"
-                        placeholder="Description"
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="text"
-                        class="sales-business-activity"
-                        placeholder="Business Activity"
-                    >
-                </td>
-
-                <td>
-                    <button
-                        type="button"
-                        class="sales-remove-row-btn"
-                        title="Remove row"
-                    >
-                        ×
-                    </button>
-                </td>
-            `;
-
-            return row;
-
-        }
-
-
-        /* =====================================================
-           GET PRODUCT DATA
-        ===================================================== */
-
-        function getProductRows() {
-
-            if (!salesItemsBody) {
-
-                return [];
-
-            }
-
-            return Array.from(
-                salesItemsBody.querySelectorAll(
-                    ".sales-item-row"
+            salesAccountingBody
+                .querySelectorAll(
+                    ".journal-row-document"
                 )
-            ).map(
-                row => {
+                .forEach(
+                    input => {
 
-                    const itemName =
-                        row.querySelector(
-                            ".sales-item-name"
-                        )?.value.trim() ||
-                        "";
+                        input.value =
+                            documentNo;
 
-                    const quantity =
-                        Number(
-                            row.querySelector(
-                                ".sales-item-qty"
-                            )?.value
-                        ) || 0;
+                    }
+                );
 
-                    const unitPrice =
-                        Number(
-                            row.querySelector(
-                                ".sales-item-price"
-                            )?.value
-                        ) || 0;
 
-                    return {
+            salesAccountingBody
+                .querySelectorAll(
+                    ".journal-row-payee"
+                )
+                .forEach(
+                    input => {
 
-                        item_name:
-                            itemName,
+                        input.value =
+                            customerCode;
 
-                        quantity,
-
-                        unit_price:
-                            unitPrice,
-
-                        total:
-                            quantity *
-                            unitPrice
-
-                    };
-
-                }
-            );
+                    }
+                );
 
         }
 
 
         /* =====================================================
-           GET ACCOUNTING DATA
+           GET ACCOUNTING ROWS
         ===================================================== */
 
         function getAccountingRows() {
 
-            if (!salesAccountingBody) {
-
-                return [];
-
-            }
-
             return Array.from(
-                salesAccountingBody.querySelectorAll(
-                    ".sales-accounting-row"
-                )
-            ).map(
-                row => {
+                salesAccountingBody
+                    .querySelectorAll(
+                        ".sales-accounting-row"
+                    )
+            )
+                .map(
+                    row => {
 
-                    return {
-
-                        debit_account_id:
+                        const debitAccount =
                             row.querySelector(
                                 ".sales-debit-account"
-                            )?.value ||
-                            "",
+                            );
 
-                        debit_amount:
-                            Number(
-                                row.querySelector(
-                                    ".sales-debit-amount"
-                                )?.value
-                            ) || 0,
+                        const debitAmount =
+                            row.querySelector(
+                                ".sales-debit-amount"
+                            );
 
-                        credit_account_id:
+                        const creditAccount =
                             row.querySelector(
                                 ".sales-credit-account"
-                            )?.value ||
-                            "",
+                            );
 
-                        credit_amount:
-                            Number(
-                                row.querySelector(
-                                    ".sales-credit-amount"
-                                )?.value
-                            ) || 0,
+                        const creditAmount =
+                            row.querySelector(
+                                ".sales-credit-amount"
+                            );
 
-                        particulars:
+                        const particulars =
                             row.querySelector(
                                 ".sales-particulars"
-                            )?.value.trim() ||
-                            "",
+                            );
 
-                        business_activity:
+                        const businessActivity =
                             row.querySelector(
                                 ".sales-business-activity"
-                            )?.value.trim() ||
-                            ""
+                            );
 
-                    };
 
-                }
+                        return {
+
+                            debit_account_id:
+                                debitAccount?.value ||
+                                "",
+
+                            debit_amount:
+                                Number(
+                                    debitAmount?.value
+                                ) || 0,
+
+                            credit_account_id:
+                                creditAccount?.value ||
+                                "",
+
+                            credit_amount:
+                                Number(
+                                    creditAmount?.value
+                                ) || 0,
+
+                            particulars:
+                                particulars?.value.trim() ||
+                                "",
+
+                            business_activity:
+                                businessActivity?.value.trim() ||
+                                ""
+
+                        };
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           MEANINGFUL ROW
+        ===================================================== */
+
+        function isMeaningfulRow(row) {
+
+            return Boolean(
+
+                row.debit_account_id ||
+
+                row.credit_account_id ||
+
+                row.debit_amount !== 0 ||
+
+                row.credit_amount !== 0 ||
+
+                row.particulars ||
+
+                row.business_activity
+
             );
 
         }
 
 
         /* =====================================================
-           CALCULATE ACCOUNTING TOTALS
+           TOTALS
         ===================================================== */
 
-        function calculateAccountingTotals() {
+        function calculateTotals() {
 
             const rows =
                 getAccountingRows();
 
+
+            const meaningfulRows =
+                rows.filter(
+                    isMeaningfulRow
+                );
+
+
             const totalDebit =
-                rows.reduce(
+                meaningfulRows.reduce(
                     (
                         total,
                         row
                     ) =>
                         total +
-                        row.debit_amount,
+                        Number(
+                            row.debit_amount
+                        ),
                     0
                 );
 
+
             const totalCredit =
-                rows.reduce(
+                meaningfulRows.reduce(
                     (
                         total,
                         row
                     ) =>
                         total +
-                        row.credit_amount,
+                        Number(
+                            row.credit_amount
+                        ),
                     0
                 );
+
 
             const difference =
                 Math.abs(
@@ -736,9 +1005,11 @@ document.addEventListener(
                     totalCredit
                 );
 
+
             return {
 
-                rows,
+                rows:
+                    meaningfulRows,
 
                 totalDebit,
 
@@ -752,13 +1023,14 @@ document.addEventListener(
 
 
         /* =====================================================
-           UPDATE ACCOUNTING TOTALS
+           UPDATE TOTALS
         ===================================================== */
 
-        function updateAccountingTotals() {
+        function updateTotals() {
 
             const totals =
-                calculateAccountingTotals();
+                calculateTotals();
+
 
             if (salesDebitTotal) {
 
@@ -769,6 +1041,7 @@ document.addEventListener(
 
             }
 
+
             if (salesCreditTotal) {
 
                 salesCreditTotal.textContent =
@@ -777,6 +1050,7 @@ document.addEventListener(
                     );
 
             }
+
 
             if (salesDifference) {
 
@@ -800,46 +1074,21 @@ document.addEventListener(
 
                 }
 
-                if (salesSheetStatus) {
-
-                    salesSheetStatus.textContent =
-                        "Open";
-
-                    salesSheetStatus.className =
-                        "";
-
-                }
-
-                markChanged();
-
                 return;
 
             }
 
 
             if (
-                totals.totalDebit >
-                0 &&
-                totals.totalCredit >
-                0 &&
-                totals.difference <
-                0.005
+                totals.totalDebit > 0 &&
+                totals.totalCredit > 0 &&
+                totals.difference < 0.005
             ) {
 
                 if (salesBalanceMessage) {
 
                     salesBalanceMessage.textContent =
-                        "Debit and Credit are balanced. Click Check & Save.";
-
-                }
-
-                if (salesSheetStatus) {
-
-                    salesSheetStatus.textContent =
-                        "Balanced - Not Saved";
-
-                    salesSheetStatus.className =
-                        "is-balanced";
+                        `${currentDocumentNo} is balanced. Click Check & Save.`;
 
                 }
 
@@ -852,35 +1101,297 @@ document.addEventListener(
 
                 }
 
-                if (salesSheetStatus) {
-
-                    salesSheetStatus.textContent =
-                        "Not Balanced";
-
-                    salesSheetStatus.className =
-                        "is-unbalanced";
-
-                }
-
             }
-
-            markChanged();
 
         }
 
 
         /* =====================================================
-           VALIDATE SALES INFORMATION
+           DRAFT KEY
         ===================================================== */
 
-        function validateSalesInformation() {
+        function getDraftKey() {
+
+            if (
+                !currentBatchId ||
+                !currentDocumentNo
+            ) {
+
+                return null;
+
+            }
+
+
+            return (
+                `neura-sales-draft-${currentBatchId}-${currentDocumentNo}`
+            );
+
+        }
+
+
+        /* =====================================================
+           SAVE LOCAL DRAFT
+        ===================================================== */
+
+        function saveDraft() {
+
+            const key =
+                getDraftKey();
+
+
+            if (!key) {
+
+                return;
+
+            }
+
+
+            const salesDate =
+                document.querySelector(
+                    "#salesDate"
+                );
+
+            const salesCustomer =
+                document.querySelector(
+                    "#salesCustomer"
+                );
+
+
+            const draft = {
+
+                document_no:
+                    currentDocumentNo,
+
+                batch_id:
+                    currentBatchId,
+
+                entry_date:
+                    salesDate?.value ||
+                    "",
+
+                customer:
+                    salesCustomer?.value ||
+                    "",
+
+                lines:
+                    getAccountingRows()
+
+            };
+
+
+            localStorage.setItem(
+                key,
+                JSON.stringify(
+                    draft
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           LOAD LOCAL DRAFT
+        ===================================================== */
+
+        function loadDraft() {
+
+            const key =
+                getDraftKey();
+
+
+            if (!key) {
+
+                return null;
+
+            }
+
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if (!raw) {
+
+                return null;
+
+            }
+
+
+            try {
+
+                const draft =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if (
+                    String(
+                        draft.document_no ||
+                        ""
+                    ) !==
+                    currentDocumentNo
+                ) {
+
+                    return null;
+
+                }
+
+
+                return draft;
+
+            } catch (error) {
+
+                return null;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           DELETE LOCAL DRAFT
+        ===================================================== */
+
+        function deleteDraft() {
+
+            const key =
+                getDraftKey();
+
+
+            if (key) {
+
+                localStorage.removeItem(
+                    key
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           RESET VALIDATION
+        ===================================================== */
+
+        function markChanged() {
+
+            isCheckedAndSaved =
+                false;
+
+
+            if (salesSheetPostBtn) {
+
+                salesSheetPostBtn.disabled =
+                    true;
+
+            }
+
+
+            if (salesSheetStatus) {
+
+                salesSheetStatus.textContent =
+                    "Changed - Check Again";
+
+            }
+
+        }
+
+
+        /* =====================================================
+           RENDER ROWS
+        ===================================================== */
+
+        function renderRows(
+            draft = null
+        ) {
+
+            salesAccountingBody.innerHTML =
+                "";
+
+
+            const draftLines =
+                Array.isArray(
+                    draft?.lines
+                )
+                    ? draft.lines
+                    : [];
+
+
+            const rowCount =
+                Math.max(
+                    DEFAULT_ROW_COUNT,
+                    draftLines.length
+                );
+
+
+            for (
+                let index = 0;
+                index < rowCount;
+                index++
+            ) {
+
+                const data =
+                    draftLines[index] ||
+                    {};
+
+
+                if (index === 0) {
+
+                    data.entry_date =
+                        draft?.entry_date ||
+                        getToday();
+
+                    data.customer =
+                        draft?.customer ||
+                        "";
+
+                }
+
+
+                salesAccountingBody
+                    .appendChild(
+                        createJournalRow(
+                            index,
+                            data
+                        )
+                    );
+
+            }
+
+
+            syncHeaderRows();
+
+            updateTotals();
+
+        }
+
+
+        /* =====================================================
+           VALIDATE HEADER
+        ===================================================== */
+
+        function validateHeader() {
+
+            const salesDate =
+                document.querySelector(
+                    "#salesDate"
+                );
+
+            const salesCustomer =
+                document.querySelector(
+                    "#salesCustomer"
+                );
+
 
             if (
                 !salesDate?.value
             ) {
 
                 alert(
-                    "Please enter the sales date."
+                    "Please enter the Date."
                 );
 
                 salesDate?.focus();
@@ -895,59 +1406,10 @@ document.addEventListener(
             ) {
 
                 alert(
-                    "Please select a Customer."
+                    "Please select a Payee / Customer."
                 );
 
                 salesCustomer?.focus();
-
-                return false;
-
-            }
-
-
-            if (
-                !salesPaymentMethod?.value
-            ) {
-
-                alert(
-                    "Please select a Payment Method."
-                );
-
-                salesPaymentMethod?.focus();
-
-                return false;
-
-            }
-
-
-            const products =
-                getProductRows();
-
-
-            const validProducts =
-                products.filter(
-                    product => {
-
-                        return (
-                            product.item_name &&
-                            product.quantity >
-                            0 &&
-                            product.unit_price >
-                            0
-                        );
-
-                    }
-                );
-
-
-            if (
-                validProducts.length ===
-                0
-            ) {
-
-                alert(
-                    "Please enter at least one Item / Product sold."
-                );
 
                 return false;
 
@@ -960,13 +1422,26 @@ document.addEventListener(
 
 
         /* =====================================================
-           VALIDATE ACCOUNTING ROWS
+           VALIDATE JOURNAL ROWS
         ===================================================== */
 
         function validateAccounting() {
 
             const totals =
-                calculateAccountingTotals();
+                calculateTotals();
+
+
+            if (
+                totals.rows.length === 0
+            ) {
+
+                alert(
+                    "Please enter at least one journal row."
+                );
+
+                return false;
+
+            }
 
 
             let hasDebit =
@@ -978,8 +1453,7 @@ document.addEventListener(
 
             for (
                 let index = 0;
-                index <
-                totals.rows.length;
+                index < totals.rows.length;
                 index++
             ) {
 
@@ -988,19 +1462,33 @@ document.addEventListener(
 
 
                 if (
-                    row.debit_amount >
-                    0
+                    row.debit_amount < 0 ||
+                    row.credit_amount < 0
+                ) {
+
+                    alert(
+                        `Row ${index + 1}: Amount cannot be negative.`
+                    );
+
+                    return false;
+
+                }
+
+
+                if (
+                    row.debit_amount > 0
                 ) {
 
                     hasDebit =
                         true;
+
 
                     if (
                         !row.debit_account_id
                     ) {
 
                         alert(
-                            `Accounting Row ${index + 1}: Select a Debit Account.`
+                            `Row ${index + 1}: Select a Debit Account.`
                         );
 
                         return false;
@@ -1012,12 +1500,11 @@ document.addEventListener(
 
                 if (
                     row.debit_account_id &&
-                    row.debit_amount <=
-                    0
+                    row.debit_amount <= 0
                 ) {
 
                     alert(
-                        `Accounting Row ${index + 1}: Enter a Debit Amount.`
+                        `Row ${index + 1}: Enter the Debit Amount.`
                     );
 
                     return false;
@@ -1026,19 +1513,19 @@ document.addEventListener(
 
 
                 if (
-                    row.credit_amount >
-                    0
+                    row.credit_amount > 0
                 ) {
 
                     hasCredit =
                         true;
+
 
                     if (
                         !row.credit_account_id
                     ) {
 
                         alert(
-                            `Accounting Row ${index + 1}: Select a Credit Account.`
+                            `Row ${index + 1}: Select a Credit Account.`
                         );
 
                         return false;
@@ -1050,12 +1537,45 @@ document.addEventListener(
 
                 if (
                     row.credit_account_id &&
-                    row.credit_amount <=
-                    0
+                    row.credit_amount <= 0
                 ) {
 
                     alert(
-                        `Accounting Row ${index + 1}: Enter a Credit Amount.`
+                        `Row ${index + 1}: Enter the Credit Amount.`
+                    );
+
+                    return false;
+
+                }
+
+
+                if (
+                    row.debit_amount <= 0 &&
+                    row.credit_amount <= 0
+                ) {
+
+                    alert(
+                        `Row ${index + 1}: Enter a Debit or Credit amount.`
+                    );
+
+                    return false;
+
+                }
+
+
+                if (
+                    row.debit_account_id &&
+                    row.credit_account_id &&
+                    Number(
+                        row.debit_account_id
+                    ) ===
+                    Number(
+                        row.credit_account_id
+                    )
+                ) {
+
+                    alert(
+                        `Row ${index + 1}: Debit and Credit Account cannot be the same.`
                     );
 
                     return false;
@@ -1088,6 +1608,20 @@ document.addEventListener(
 
 
             if (
+                totals.totalDebit <= 0 ||
+                totals.totalCredit <= 0
+            ) {
+
+                alert(
+                    "Debit and Credit totals must be greater than zero."
+                );
+
+                return false;
+
+            }
+
+
+            if (
                 totals.difference >=
                 0.005
             ) {
@@ -1107,18 +1641,23 @@ document.addEventListener(
 
 
         /* =====================================================
-           OPEN SALES SHEET
+           OPEN POPUP
         ===================================================== */
 
-        function openSalesSheet() {
+        async function openSalesSheet() {
 
             const selectedBatchId =
-                salesBatch
-                    .value
-                    .trim();
+                Number(
+                    salesBatch.value
+                );
 
 
-            if (!selectedBatchId) {
+            if (
+                !Number.isInteger(
+                    selectedBatchId
+                ) ||
+                selectedBatchId <= 0
+            ) {
 
                 alert(
                     "Please select a Sales Batch first."
@@ -1131,111 +1670,162 @@ document.addEventListener(
             }
 
 
-            const selectedOption =
-                salesBatch.options[
-                    salesBatch.selectedIndex
-                ];
+            salesProceedBtn.disabled =
+                true;
 
 
-            if (salesSheetBatchName) {
+            try {
 
-                salesSheetBatchName.textContent =
-                    selectedOption
-                        ?.textContent
-                        .trim() ||
-                    "Selected Batch";
+                await loadReferences();
+
+
+                currentBatchId =
+                    selectedBatchId;
+
+
+                currentDocumentNo =
+                    await getNextDocument(
+                        currentBatchId
+                    );
+
+
+                if (
+                    !currentDocumentNo
+                ) {
+
+                    throw new Error(
+                        "Unable to generate document number."
+                    );
+
+                }
+
+
+                const selectedOption =
+                    salesBatch.options[
+                        salesBatch.selectedIndex
+                    ];
+
+
+                if (
+                    salesSheetBatchName
+                ) {
+
+                    salesSheetBatchName.textContent =
+                        selectedOption
+                            ?.textContent
+                            .trim() ||
+                        "Selected Batch";
+
+                }
+
+
+                if (
+                    salesSheetActiveDocument
+                ) {
+
+                    salesSheetActiveDocument.textContent =
+                        currentDocumentNo;
+
+                }
+
+
+                if (
+                    salesSheetStatus
+                ) {
+
+                    salesSheetStatus.textContent =
+                        "Open";
+
+                }
+
+
+                isCheckedAndSaved =
+                    false;
+
+
+                if (
+                    salesSheetPostBtn
+                ) {
+
+                    salesSheetPostBtn.disabled =
+                        true;
+
+                }
+
+
+                const draft =
+                    loadDraft();
+
+
+                renderRows(
+                    draft
+                );
+
+
+                salesSheetOverlay.hidden =
+                    false;
+
+
+                document.body.classList.add(
+                    "sales-sheet-open"
+                );
+
+
+                if (
+                    draft &&
+                    salesBalanceMessage
+                ) {
+
+                    salesBalanceMessage.textContent =
+                        `Unfinished ${currentDocumentNo} restored.`;
+
+                }
+
+
+                setTimeout(
+                    () => {
+
+                        document
+                            .querySelector(
+                                "#salesCustomer"
+                            )
+                            ?.focus();
+
+                    },
+                    80
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "OPEN SALES SHEET ERROR:",
+                    error
+                );
+
+
+                alert(
+                    error.message ||
+                    "Unable to open Sales Journal."
+                );
+
+            } finally {
+
+                salesProceedBtn.disabled =
+                    false;
 
             }
-
-
-            if (
-                salesSheetActiveDocument
-            ) {
-
-                salesSheetActiveDocument.textContent =
-                    ACTIVE_DOCUMENT;
-
-            }
-
-
-            if (
-                salesDocumentNo
-            ) {
-
-                salesDocumentNo.value =
-                    ACTIVE_DOCUMENT;
-
-                salesDocumentNo.readOnly =
-                    true;
-
-            }
-
-
-            if (
-                salesDate &&
-                !salesDate.value
-            ) {
-
-                salesDate.value =
-                    getToday();
-
-            }
-
-
-            if (salesSheetStatus) {
-
-                salesSheetStatus.textContent =
-                    "Open";
-
-                salesSheetStatus.className =
-                    "";
-
-            }
-
-
-            isCheckedAndSaved =
-                false;
-
-
-            if (salesSheetPostBtn) {
-
-                salesSheetPostBtn.disabled =
-                    true;
-
-            }
-
-
-            salesSheetOverlay.hidden =
-                false;
-
-
-            document.body.classList.add(
-                "sales-sheet-open"
-            );
-
-
-            updateProductTotals();
-
-            updateAccountingTotals();
-
-
-            setTimeout(
-                () => {
-
-                    salesCustomer?.focus();
-
-                },
-                100
-            );
 
         }
 
 
         /* =====================================================
-           CLOSE SALES SHEET
+           CLOSE POPUP
         ===================================================== */
 
         function closeSalesSheet() {
+
+            saveDraft();
+
 
             salesSheetOverlay.hidden =
                 true;
@@ -1249,7 +1839,333 @@ document.addEventListener(
 
 
         /* =====================================================
-           PROCEED BUTTON
+           ADD ROW
+        ===================================================== */
+
+        function addJournalRow() {
+
+            const currentRows =
+                salesAccountingBody
+                    .querySelectorAll(
+                        ".sales-accounting-row"
+                    )
+                    .length;
+
+
+            const row =
+                createJournalRow(
+                    currentRows,
+                    {}
+                );
+
+
+            salesAccountingBody
+                .appendChild(
+                    row
+                );
+
+
+            syncHeaderRows();
+
+            markChanged();
+
+            saveDraft();
+
+
+            row.querySelector(
+                ".sales-debit-account"
+            )?.focus();
+
+        }
+
+
+        /* =====================================================
+           JOURNAL CHANGED
+        ===================================================== */
+
+        function journalChanged(
+            event
+        ) {
+
+            if (
+                event.target.id ===
+                    "salesDate" ||
+                event.target.id ===
+                    "salesCustomer"
+            ) {
+
+                syncHeaderRows();
+
+            }
+
+
+            updateTotals();
+
+            markChanged();
+
+            saveDraft();
+
+        }
+
+
+        /* =====================================================
+           CHECK & SAVE
+        ===================================================== */
+
+        function checkAndSave() {
+
+            if (
+                !validateHeader()
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !validateAccounting()
+            ) {
+
+                return;
+
+            }
+
+
+            saveDraft();
+
+
+            isCheckedAndSaved =
+                true;
+
+
+            if (
+                salesSheetStatus
+            ) {
+
+                salesSheetStatus.textContent =
+                    "Saved / Ready to Post";
+
+            }
+
+
+            if (
+                salesBalanceMessage
+            ) {
+
+                salesBalanceMessage.textContent =
+                    `${currentDocumentNo} is balanced and ready to post.`;
+
+            }
+
+
+            if (
+                salesSheetPostBtn
+            ) {
+
+                salesSheetPostBtn.disabled =
+                    false;
+
+            }
+
+
+            alert(
+                `${currentDocumentNo} checked successfully.\n\nDebit and Credit are balanced.`
+            );
+
+        }
+
+
+        /* =====================================================
+           POST TO MYSQL
+        ===================================================== */
+
+        async function postEntry() {
+
+            if (
+                !isCheckedAndSaved
+            ) {
+
+                alert(
+                    "Please click Check & Save first."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                !validateHeader() ||
+                !validateAccounting()
+            ) {
+
+                isCheckedAndSaved =
+                    false;
+
+                salesSheetPostBtn.disabled =
+                    true;
+
+                return;
+
+            }
+
+
+            const totals =
+                calculateTotals();
+
+
+            const salesDate =
+                document.querySelector(
+                    "#salesDate"
+                );
+
+            const salesCustomer =
+                document.querySelector(
+                    "#salesCustomer"
+                );
+
+
+            const payload = {
+
+                batch_id:
+                    currentBatchId,
+
+                entry_date:
+                    salesDate.value,
+
+                document_no:
+                    currentDocumentNo,
+
+                customer_name:
+                    salesCustomer.value,
+
+                lines:
+                    totals.rows.map(
+                        row => ({
+
+                            debit_account_id:
+                                row.debit_account_id
+                                    ? Number(
+                                        row.debit_account_id
+                                    )
+                                    : null,
+
+                            debit_amount:
+                                Number(
+                                    row.debit_amount
+                                ) || 0,
+
+                            credit_account_id:
+                                row.credit_account_id
+                                    ? Number(
+                                        row.credit_account_id
+                                    )
+                                    : null,
+
+                            credit_amount:
+                                Number(
+                                    row.credit_amount
+                                ) || 0,
+
+                            particulars:
+                                row.particulars,
+
+                            business_activity:
+                                row.business_activity
+
+                        })
+                    )
+
+            };
+
+
+            const originalText =
+                salesSheetPostBtn.textContent;
+
+
+            salesSheetPostBtn.disabled =
+                true;
+
+            salesSheetPostBtn.textContent =
+                "Posting...";
+
+
+            try {
+
+                const result =
+                    await fetchJSON(
+                        "/api/sales-journal",
+                        {
+                            method:
+                                "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    payload
+                                )
+                        }
+                    );
+
+
+                deleteDraft();
+
+
+                alert(
+                    `${currentDocumentNo} posted successfully.\n\nNext document: ${result.next_document || "Generated after reload"}`
+                );
+
+
+                salesSheetOverlay.hidden =
+                    true;
+
+
+                document.body.classList.remove(
+                    "sales-sheet-open"
+                );
+
+
+                /*
+                 * Reload so:
+                 * - history updates
+                 * - the next Proceed request comes from MySQL
+                 * - 01-0002 appears only AFTER 01-0001 is posted
+                 */
+
+                window.location.reload();
+
+            } catch (error) {
+
+                console.error(
+                    "POST SALES JOURNAL ERROR:",
+                    error
+                );
+
+
+                alert(
+                    error.message ||
+                    "Unable to post Sales Journal."
+                );
+
+
+                salesSheetPostBtn.disabled =
+                    false;
+
+                salesSheetPostBtn.textContent =
+                    originalText;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           EVENTS
         ===================================================== */
 
         salesProceedBtn.addEventListener(
@@ -1257,10 +2173,6 @@ document.addEventListener(
             openSalesSheet
         );
 
-
-        /* =====================================================
-           CLOSE BUTTON
-        ===================================================== */
 
         closeSalesSheetBtn
             ?.addEventListener(
@@ -1276,432 +2188,40 @@ document.addEventListener(
             );
 
 
-        /* =====================================================
-           ADD ITEM
-        ===================================================== */
-
-        addSalesItemBtn
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    if (!salesItemsBody) {
-
-                        return;
-
-                    }
-
-                    const row =
-                        createProductRow();
-
-
-                    salesItemsBody.appendChild(
-                        row
-                    );
-
-
-                    markChanged();
-
-
-                    row.querySelector(
-                        ".sales-item-name"
-                    )?.focus();
-
-                }
-            );
-
-
-        /* =====================================================
-           PRODUCT INPUT EVENTS
-        ===================================================== */
-
-        salesItemsBody
-            ?.addEventListener(
-                "input",
-                updateProductTotals
-            );
-
-
-        /* =====================================================
-           REMOVE PRODUCT ROW
-        ===================================================== */
-
-        salesItemsBody
-            ?.addEventListener(
-                "click",
-                event => {
-
-                    const removeButton =
-                        event.target.closest(
-                            ".sales-remove-row-btn"
-                        );
-
-
-                    if (!removeButton) {
-
-                        return;
-
-                    }
-
-
-                    const row =
-                        removeButton.closest(
-                            ".sales-item-row"
-                        );
-
-
-                    if (!row) {
-
-                        return;
-
-                    }
-
-
-                    const rows =
-                        salesItemsBody.querySelectorAll(
-                            ".sales-item-row"
-                        );
-
-
-                    if (
-                        rows.length <=
-                        1
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    row.remove();
-
-
-                    updateProductTotals();
-
-                }
-            );
-
-
-        /* =====================================================
-           ADD ACCOUNTING ROW
-        ===================================================== */
-
         addSalesAccountingRowBtn
             ?.addEventListener(
                 "click",
-                () => {
-
-                    if (!salesAccountingBody) {
-
-                        return;
-
-                    }
-
-
-                    const row =
-                        createAccountingRow();
-
-
-                    salesAccountingBody.appendChild(
-                        row
-                    );
-
-
-                    markChanged();
-
-
-                    row.querySelector(
-                        ".sales-debit-account"
-                    )?.focus();
-
-                }
+                addJournalRow
             );
 
 
-        /* =====================================================
-           ACCOUNTING EVENTS
-        ===================================================== */
-
         salesAccountingBody
-            ?.addEventListener(
+            .addEventListener(
                 "input",
-                updateAccountingTotals
+                journalChanged
             );
 
 
         salesAccountingBody
-            ?.addEventListener(
+            .addEventListener(
                 "change",
-                updateAccountingTotals
+                journalChanged
             );
 
-
-        /* =====================================================
-           REMOVE ACCOUNTING ROW
-        ===================================================== */
-
-        salesAccountingBody
-            ?.addEventListener(
-                "click",
-                event => {
-
-                    const removeButton =
-                        event.target.closest(
-                            ".sales-remove-row-btn"
-                        );
-
-
-                    if (!removeButton) {
-
-                        return;
-
-                    }
-
-
-                    const row =
-                        removeButton.closest(
-                            ".sales-accounting-row"
-                        );
-
-
-                    if (!row) {
-
-                        return;
-
-                    }
-
-
-                    const rows =
-                        salesAccountingBody
-                            .querySelectorAll(
-                                ".sales-accounting-row"
-                            );
-
-
-                    if (
-                        rows.length <=
-                        1
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    row.remove();
-
-
-                    updateAccountingTotals();
-
-                }
-            );
-
-
-        /* =====================================================
-           CUSTOMER / PAYMENT / DATE CHANGES
-        ===================================================== */
-
-        salesCustomer
-            ?.addEventListener(
-                "change",
-                markChanged
-            );
-
-
-        salesPaymentMethod
-            ?.addEventListener(
-                "change",
-                markChanged
-            );
-
-
-        salesDate
-            ?.addEventListener(
-                "change",
-                markChanged
-            );
-
-
-        /* =====================================================
-           CHECK & SAVE
-
-           PREVIEW / VALIDATION ONLY FOR NOW
-        ===================================================== */
 
         checkSaveSalesBtn
             ?.addEventListener(
                 "click",
-                () => {
-
-                    if (
-                        !validateSalesInformation()
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    if (
-                        !validateAccounting()
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    isCheckedAndSaved =
-                        true;
-
-
-                    if (salesSheetStatus) {
-
-                        salesSheetStatus.textContent =
-                            "Saved / Ready to Post";
-
-                        salesSheetStatus.className =
-                            "is-saved";
-
-                    }
-
-
-                    if (salesBalanceMessage) {
-
-                        salesBalanceMessage.textContent =
-                            `${ACTIVE_DOCUMENT} is balanced and validated.`;
-
-                    }
-
-
-                    if (salesSheetPostBtn) {
-
-                        salesSheetPostBtn.disabled =
-                            false;
-
-                    }
-
-
-                    alert(
-                        `${ACTIVE_DOCUMENT} checked successfully.\n\nDebit and Credit are balanced.`
-                    );
-
-                }
+                checkAndSave
             );
 
-
-        /* =====================================================
-           POST ENTRY
-
-           PREVIEW ONLY.
-
-           We deliberately DO NOT call the old
-           /api/sales-journal POST yet because
-           that endpoint only supports a single
-           Debit + Credit pair.
-
-           We also DO NOT create 01-0002 yet.
-        ===================================================== */
 
         salesSheetPostBtn
             ?.addEventListener(
                 "click",
-                () => {
-
-                    if (
-                        !isCheckedAndSaved
-                    ) {
-
-                        alert(
-                            "Please click Check & Save first."
-                        );
-
-                        return;
-
-                    }
-
-
-                    const totals =
-                        calculateAccountingTotals();
-
-
-                    if (
-                        totals.difference >=
-                        0.005
-                    ) {
-
-                        alert(
-                            "The journal entry is no longer balanced."
-                        );
-
-                        isCheckedAndSaved =
-                            false;
-
-                        salesSheetPostBtn.disabled =
-                            true;
-
-                        return;
-
-                    }
-
-
-                    const previewData = {
-
-                        document_no:
-                            ACTIVE_DOCUMENT,
-
-                        batch_id:
-                            Number(
-                                salesBatch.value
-                            ),
-
-                        entry_date:
-                            salesDate?.value ||
-                            "",
-
-                        customer:
-                            salesCustomer?.value ||
-                            "",
-
-                        payment_method:
-                            salesPaymentMethod?.value ||
-                            "",
-
-                        products:
-                            getProductRows(),
-
-                        accounting_lines:
-                            totals.rows,
-
-                        total_debit:
-                            totals.totalDebit,
-
-                        total_credit:
-                            totals.totalCredit,
-
-                        difference:
-                            totals.difference
-
-                    };
-
-
-                    console.log(
-                        "NEURA SALES JOURNAL READY:",
-                        previewData
-                    );
-
-
-                    alert(
-                        `${ACTIVE_DOCUMENT} is ready to POST.\n\nNext step: connect this complete journal sheet to MySQL.\n\n01-0002 will only appear after successful posting.`
-                    );
-
-                }
+                postEntry
             );
 
-
-        /* =====================================================
-           ESCAPE KEY
-        ===================================================== */
 
         document.addEventListener(
             "keydown",
@@ -1709,7 +2229,7 @@ document.addEventListener(
 
                 if (
                     event.key ===
-                    "Escape" &&
+                        "Escape" &&
                     !salesSheetOverlay.hidden
                 ) {
 
@@ -1720,10 +2240,6 @@ document.addEventListener(
             }
         );
 
-
-        /* =====================================================
-           CLICK OUTSIDE MODAL
-        ===================================================== */
 
         salesSheetOverlay.addEventListener(
             "click",
@@ -1743,29 +2259,12 @@ document.addEventListener(
 
 
         /* =====================================================
-           INITIAL DOCUMENT NUMBER
+           INITIAL
         ===================================================== */
 
-        if (salesDocumentNo) {
-
-            salesDocumentNo.value =
-                ACTIVE_DOCUMENT;
-
-            salesDocumentNo.readOnly =
-                true;
-
-        }
-
-
-        if (salesSheetActiveDocument) {
-
-            salesSheetActiveDocument.textContent =
-                ACTIVE_DOCUMENT;
-
-        }
-
-
-        if (salesSheetPostBtn) {
+        if (
+            salesSheetPostBtn
+        ) {
 
             salesSheetPostBtn.disabled =
                 true;
