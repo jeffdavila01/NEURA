@@ -1,0 +1,1239 @@
+﻿/* =====================================================
+   NEURA-SHEET FINAL DESIGN
+   Standalone layout foundation
+   Fintech Workspace + White Glass Navigation
+   ===================================================== */
+
+:root {
+  --ns-bg: #f3f5f9;
+  --ns-card: #ffffff;
+  --ns-text: #1d293b;
+  --ns-muted: #7b899b;
+  --ns-border: #e7eaf0;
+  --ns-blue: #345edb;
+}
+
+.ns-fintech,
+.ns-fintech *,
+.ns-fintech *::before,
+.ns-fintech *::after {
+  box-sizing: border-box;
+}
+
+body.ns-fintech {
+  margin: 0;
+  background: var(--ns-bg);
+  color: var(--ns-text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  line-height: 1.5;
+  min-width: 0;
+}
+
+/* ===== APPLICATION SIDEBAR ===== */
+
+.ns-fintech .sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 264px;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  padding: 22px 13px 16px;
+  background: #fff;
+  color: #24334d;
+  border-right: 1px solid #e3e9f1;
+}
+
+.ns-fintech .sidebar .brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 65px;
+}
+
+.ns-fintech .sidebar .brand-logo {
+  width: 43px;
+  height: 43px;
+  flex: 0 0 43px;
+  object-fit: contain;
+  border-radius: 11px;
+}
+
+.ns-fintech .sidebar .brand-name {
+  color: #1b2940;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  white-space: nowrap;
+}
+
+.ns-fintech .sidebar nav {
+  display: block;
+  flex: 1 0 auto;
+  width: 100%;
+}
+
+.ns-fintech .nav-group {
+  margin-bottom: 19px;
+}
+
+.ns-fintech .nav-group-title {
+  display: block;
+  margin: 0 0 8px;
+  padding: 0 13px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.45px;
+  text-transform: uppercase;
+  color: #788ba5;
+}
+
+.ns-fintech .sidebar nav .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 43px;
+  padding: 11px 12px;
+  margin: 2px 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #34455f;
+  font-size: 13px;
+  font-weight: 560;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: background .18s, color .18s;
+}
+
+.ns-fintech .sidebar nav .nav-item:hover {
+  background: #edf3ff;
+  color: #173153;
+}
+
+.ns-fintech .sidebar nav .nav-item.active,
+.ns-fintech .sidebar nav .nav-item[aria-current="page"] {
+  color: #fff;
+  background: #345edb;
+  font-weight: 700;
+}
+
+.ns-fintech .nav-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  color: currentColor;
+}
+
+.ns-fintech .nav-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ns-fintech .sidebar .side-label {
+  display: none;
+}
+
+.ns-fintech .sidebar .sidebar-note {
+  margin: auto 8px 0;
+  padding: 15px 7px 0;
+  border-top: 1px solid #e2e8f0;
+  color: #73849f;
+  font-size: 11px;
+}
+
+/* ===== MAIN WORKSPACE ===== */
+
+.ns-fintech main,
+.ns-fintech .main {
+  display: block;
+  width: calc(100% - 264px);
+  max-width: none;
+  min-width: 0;
+  min-height: 100vh;
+  margin-left: 264px;
+  padding: 0 32px 35px;
+  background: transparent;
+}
+
+.ns-fintech .ns-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 73px;
+  margin: 0 -32px 28px;
+  padding: 0 32px;
+  background: #fff;
+  border-bottom: 1px solid #e7eaf0;
+}
+
+.ns-fintech .ns-topbar-left,
+.ns-fintech .ns-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ns-fintech .ns-appname {
+  color: #21324e;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.ns-fintech .ns-breadcrumb {
+  color: #8291a5;
+  font-size: 13px;
+}
+
+.ns-fintech .ns-top-chip {
+  padding: 7px 11px;
+  border: 1px solid #e4eaf3;
+  border-radius: 20px;
+  background: #f8fafd;
+  color: #546780;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.ns-fintech .ns-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 39px;
+  height: 39px;
+  border: 1px solid #dce5f0;
+  border-radius: 9px;
+  background: #fff;
+  color: #223654;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+/* ===== PAGE HEADERS ===== */
+
+.ns-fintech .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0 0 25px;
+  padding: 0;
+}
+
+.ns-fintech .page-header h1,
+.ns-fintech main h1 {
+  color: #152239;
+  font-size: clamp(23px, 2.5vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -.8px;
+  font-weight: 800;
+}
+
+.ns-fintech .eyebrow {
+  color: #5e75a0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
+.ns-fintech .muted,
+.ns-fintech .page-header p {
+  color: #7b899b;
+}
+
+.ns-fintech .version {
+  padding: 7px 12px;
+  border: 1px solid #dce7fa;
+  border-radius: 20px;
+  background: #edf3ff;
+  color: #305fc2;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ===== PANELS AND METRICS ===== */
+
+.ns-fintech .panel,
+.ns-fintech .card,
+.ns-fintech .stat {
+  background: #fff;
+  border: 1px solid #e7eaf0;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(31,49,84,.045);
+}
+
+.ns-fintech .panel,
+.ns-fintech .card {
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.ns-fintech .stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(170px,1fr));
+  gap: 15px;
+  margin: 19px 0;
+}
+
+.ns-fintech .stat {
+  position: relative;
+  overflow: hidden;
+  padding: 22px;
+}
+
+.ns-fintech .stat strong {
+  display: block;
+  font-size: clamp(25px,3vw,33px);
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+/* ===== INPUTS ===== */
+
+.ns-fintech input:not([type="checkbox"]):not([type="radio"]),
+.ns-fintech select,
+.ns-fintech textarea {
+  border: 1px solid #d9e2ef;
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #263950;
+  font: inherit;
+  max-width: 100%;
+}
+
+.ns-fintech input:focus-visible,
+.ns-fintech select:focus-visible,
+.ns-fintech textarea:focus-visible,
+.ns-fintech button:focus-visible,
+.ns-fintech a:focus-visible {
+  outline: 3px solid #98b9ff;
+  outline-offset: 2px;
+}
+
+.ns-fintech main button,
+.ns-fintech .main button {
+  border-radius: 9px;
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ns-fintech button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ===== DATA TABLES ===== */
+
+.ns-fintech .table-wrap {
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid #e6ebf3;
+  border-radius: 10px;
+}
+
+.ns-fintech table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.ns-fintech th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f7f9fc;
+  color: #5e6f88;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ns-fintech th,
+.ns-fintech td {
+  padding: 13px 15px;
+  border-bottom: 1px solid #e9eef5;
+  vertical-align: middle;
+}
+
+.ns-fintech tbody tr:hover {
+  background: #edf3ff;
+}
+
+/* ===== FOOTER ===== */
+
+.ns-fintech footer {
+  padding: 22px 0 7px;
+  color: #97a3b4;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ===== MOBILE NAVIGATION ===== */
+
+.ns-fintech .ns-backdrop {
+  display: none;
+}
+
+@media (max-width: 950px) {
+  .ns-fintech .sidebar {
+    transform: translateX(-100%);
+    transition: transform .2s ease;
+    width: min(280px,85vw);
+  }
+
+  .ns-fintech.ns-nav-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .ns-fintech main,
+  .ns-fintech .main {
+    width: 100%;
+    margin-left: 0;
+    padding: 0 20px 25px;
+  }
+
+  .ns-fintech .ns-topbar {
+    margin: 0 -20px 22px;
+    padding: 0 20px;
+  }
+
+  .ns-fintech .ns-menu-btn {
+    display: inline-flex;
+  }
+
+  .ns-fintech.ns-nav-open .ns-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(6,18,39,.55);
+  }
+}
+
+@media (max-width: 560px) {
+  .ns-fintech main,
+  .ns-fintech .main {
+    padding: 0 12px 20px;
+  }
+
+  .ns-fintech .ns-topbar {
+    margin: 0 -12px 18px;
+    padding: 0 12px;
+    min-height: 62px;
+  }
+
+  .ns-fintech .ns-topbar-right,
+  .ns-fintech .ns-breadcrumb {
+    display: none;
+  }
+
+  .ns-fintech .panel,
+  .ns-fintech .card {
+    padding: 15px;
+  }
+
+  .ns-fintech .stats {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+  }
+}
+
+/* Drawer must remain hidden until inspection is opened */
+.ns-fintech .ft-drawer[hidden],
+.ns-fintech .ft-drawer-overlay[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ns-fintech *,
+  .ns-fintech *::before,
+  .ns-fintech *::after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* NEURA-SHEET FINTECH WORKSPACE v3.0 */
+
+:root {
+  --ft-bg: #f3f5f9;
+  --ft-card: #ffffff;
+  --ft-navy: #101929;
+  --ft-accent: #345edb;
+  --ft-text: #1d293b;
+  --ft-muted: #7b899b;
+  --ft-border: #e7eaf0;
+}
+
+body.ns-fintech,
+body.ns-fintech.neura-modern {
+  background: var(--ft-bg);
+  color: var(--ft-text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+/* NAVIGATION */
+
+.ns-fintech .sidebar {
+  background: #111a2a;
+  border-right: 1px solid #263145;
+  padding: 24px 13px;
+}
+
+.ns-fintech .sidebar .brand {
+  background: #1b283a;
+  border: 1px solid #2a394e;
+  border-radius: 14px;
+  padding: 12px;
+  margin: 0 0 26px;
+  min-height: 70px;
+}
+
+.ns-fintech .sidebar .brand-logo {
+  width: 43px;
+  height: 43px;
+  object-fit: contain;
+  border-radius: 11px;
+}
+
+.ns-fintech .sidebar .brand-name {
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: -.5px;
+  font-weight: 800;
+}
+
+.ns-fintech .nav-group-title {
+  color: #8195b2;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.ns-fintech .sidebar nav .nav-item {
+  color: #b4c2d6;
+  margin: 4px 0;
+  min-height: 45px;
+  border-radius: 11px;
+}
+
+.ns-fintech .sidebar nav .nav-item:hover {
+  background: #202e43;
+}
+
+.ns-fintech .sidebar nav .nav-item.active,
+.ns-fintech .sidebar nav .nav-item[aria-current="page"] {
+  background: #28478d;
+  color: white;
+  border-color: #3757a0;
+  box-shadow: inset 3px 0 0 #81a7ff;
+}
+
+/* TOPBAR */
+
+.ns-fintech .ns-topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--ft-border);
+  min-height: 78px;
+}
+
+.ns-fintech .ns-appname {
+  color: #17253c;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.ns-fintech .ns-top-chip {
+  border-radius: 10px;
+  background: #edf2ff;
+  color: #3e5db6;
+  border-color: #e1e9fc;
+}
+
+/* TYPOGRAPHY */
+
+.ns-fintech .page-header h1,
+.ns-fintech main h1 {
+  color: #152239;
+  font-size: clamp(24px, 2.7vw, 32px);
+  letter-spacing: -1px;
+}
+
+.ns-fintech .eyebrow {
+  color: #4768aa;
+}
+
+.ns-fintech .muted {
+  color: var(--ft-muted);
+}
+
+/* CARDS */
+
+.ns-fintech .panel,
+.ns-fintech .card,
+.ns-fintech .stat {
+  background: var(--ft-card);
+  border: 1px solid var(--ft-border);
+  border-radius: 17px;
+  box-shadow: 0 6px 23px rgba(20,37,66,.035);
+}
+
+.ns-fintech .panel,
+.ns-fintech .card {
+  padding: 25px;
+}
+
+.ns-fintech .panel h2,
+.ns-fintech .card h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #192941;
+}
+
+.ns-fintech .stats {
+  gap: 16px;
+}
+
+.ns-fintech .stat {
+  padding: 23px;
+  transition: box-shadow .2s;
+}
+
+.ns-fintech .stat::before {
+  height: 0;
+}
+
+.ns-fintech .stat::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #95b4fa;
+}
+
+.ns-fintech .stat strong {
+  font-size: clamp(26px, 3vw, 34px);
+  color: #16243b;
+}
+
+.ns-fintech .stat p {
+  color: #7a8798;
+}
+
+/* CONTROLS */
+
+.ns-fintech main button:not(.secondary):not(:disabled) {
+  background: #345edb;
+  border-color: #345edb;
+  color: white;
+  border-radius: 10px;
+}
+
+.ns-fintech main button.secondary {
+  background: #f7f9fd;
+  color: #34517b;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+}
+
+.ns-fintech main button:hover:not(:disabled) {
+  box-shadow: 0 5px 16px rgba(52,94,219,.14);
+}
+
+.ns-fintech input:not([type="checkbox"]):not([type="radio"]),
+.ns-fintech select,
+.ns-fintech textarea {
+  border-radius: 10px;
+}
+
+.ns-fintech input[type="file"] {
+  border: 1.5px dashed #bdcbe1;
+  background: #f8faff;
+  padding: 18px;
+}
+
+/* TABLES */
+
+.ns-fintech .table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--ft-border);
+  border-radius: 12px;
+}
+
+.ns-fintech table {
+  font-size: 13px;
+}
+
+.ns-fintech th {
+  background: #f7f9fc;
+  color: #596b83;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  border-bottom: 1px solid #e2e7f0;
+}
+
+.ns-fintech td {
+  color: #37485e;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.ns-fintech tbody tr:nth-child(even) {
+  background: #fcfdff;
+}
+
+.ns-fintech tbody tr[data-ns-inspectable="true"] {
+  cursor: pointer;
+}
+
+.ns-fintech tbody tr[data-ns-inspectable="true"]:hover {
+  background: #edf3ff;
+}
+
+.ns-fintech tbody tr[data-ns-selected="true"] {
+  background: #e9f0ff;
+}
+
+/* DETAILS DRAWER */
+
+.ns-fintech .ft-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: rgba(11,22,40,.34);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s, visibility .2s;
+}
+
+.ns-fintech .ft-drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 200;
+  width: min(430px, 100vw);
+  height: 100dvh;
+  overflow-y: auto;
+  background: #fff;
+  box-shadow: -16px 0 45px rgba(13,25,49,.15);
+  transform: translateX(102%);
+  visibility: hidden;
+  transition: transform .24s, visibility .24s;
+  display: flex;
+  flex-direction: column;
+}
+
+.ns-fintech.ft-drawer-open .ft-drawer-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ns-fintech.ft-drawer-open .ft-drawer {
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.ft-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 29px 26px 22px;
+  border-bottom: 1px solid #e9edf4;
+}
+
+.ft-drawer-kicker {
+  margin: 0 0 8px;
+  color: #5573aa;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
+.ft-drawer-head h2 {
+  margin: 0;
+  color: #182740;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.ft-drawer-close {
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid #dde5ef;
+  border-radius: 10px;
+  background: #f7f9fc;
+  color: #455770;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.ft-drawer-body {
+  padding: 24px 26px;
+}
+
+.ft-detail {
+  padding: 13px 0;
+  border-bottom: 1px solid #eef1f6;
+}
+
+.ft-detail-label {
+  display: block;
+  margin-bottom: 7px;
+  color: #8090a3;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  font-weight: 750;
+}
+
+.ft-detail-value {
+  color: #21334f;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.ft-drawer-foot {
+  margin-top: auto;
+  padding: 16px 26px;
+  border-top: 1px solid #ebeff5;
+  color: #7b899e;
+  font-size: 12px;
+  background: #fbfcfe;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:750px) {
+  .ns-fintech .panel,
+  .ns-fintech .card {
+    padding: 16px;
+  }
+
+  .ns-fintech .stats {
+    gap: 10px;
+  }
+
+  .ft-drawer-head,
+  .ft-drawer-body {
+    padding-left: 19px;
+    padding-right: 19px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .ns-fintech .ft-drawer,
+  .ns-fintech .ft-drawer-overlay {
+    transition: none;
+  }
+}
+
+
+/* NEURA GLASS SIDEBAR OVERRIDE START */
+
+/* White / glass sidebar */
+.ns-fintech .sidebar {
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-right: 1px solid rgba(220, 227, 238, 0.95) !important;
+  box-shadow: 8px 0 24px rgba(30, 41, 59, 0.06);
+  color: #1f2a3d !important;
+}
+
+/* Brand card */
+.ns-fintech .sidebar .brand {
+  background: rgba(255, 255, 255, 0.58) !important;
+  border: 1px solid rgba(214, 223, 236, 0.95) !important;
+  box-shadow: 0 8px 20px rgba(22, 34, 56, 0.05);
+}
+
+.ns-fintech .sidebar .brand-name {
+  color: #1b2940 !important;
+}
+
+/* Section labels */
+.ns-fintech .nav-group-title {
+  color: #6f82a1 !important;
+}
+
+/* Nav links */
+.ns-fintech .sidebar nav .nav-item {
+  color: #34455f !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+
+.ns-fintech .sidebar nav .nav-item .nav-icon {
+  color: #4a5d7b !important;
+}
+
+.ns-fintech .sidebar nav .nav-item:hover {
+  background: rgba(53, 106, 230, 0.08) !important;
+  color: #173153 !important;
+  border-color: rgba(53, 106, 230, 0.12) !important;
+}
+
+.ns-fintech .sidebar nav .nav-item:hover .nav-icon {
+  color: #2f5fd4 !important;
+}
+
+/* Active nav */
+.ns-fintech .sidebar nav .nav-item.active,
+.ns-fintech .sidebar nav .nav-item[aria-current="page"] {
+  background: linear-gradient(135deg, #3c67df, #5a86ff) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 8px 18px rgba(52, 94, 219, 0.22);
+}
+
+.ns-fintech .sidebar nav .nav-item.active .nav-icon,
+.ns-fintech .sidebar nav .nav-item[aria-current="page"] .nav-icon {
+  color: #ffffff !important;
+}
+
+/* Footer note */
+.ns-fintech .sidebar .sidebar-note {
+  color: #73849f !important;
+  border-top: 1px solid rgba(218, 225, 236, 0.95) !important;
+}
+
+/* Optional softer main topbar to match */
+.ns-fintech .ns-topbar {
+  background: rgba(255, 255, 255, 0.84) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Mobile sidebar */
+@media (max-width: 950px) {
+  .ns-fintech .sidebar {
+    background: rgba(255, 255, 255, 0.9) !important;
+  }
+}
+
+/* NEURA GLASS SIDEBAR OVERRIDE END */
+
+
+/* NEURA CLICK EFFECT FIX START */
+
+/* Remove mobile/browser blue tap flash */
+.ns-fintech a,
+.ns-fintech button,
+.ns-fintech .nav-item,
+.ns-fintech select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Neutral focus appearance for mouse interaction */
+.ns-fintech a:focus:not(:focus-visible),
+.ns-fintech button:focus:not(:focus-visible),
+.ns-fintech .nav-item:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Accessible keyboard navigation — neutral instead of blue */
+.ns-fintech a:focus-visible,
+.ns-fintech button:focus-visible,
+.ns-fintech .nav-item:focus-visible {
+  outline: 2px solid #64748b;
+  outline-offset: 2px;
+}
+
+/* Remove temporary blue background when pressing */
+.ns-fintech .sidebar nav .nav-item:active:not(.active):not([aria-current="page"]) {
+  background: transparent !important;
+  color: #34455f !important;
+}
+
+/* Remove blue click flash from ordinary buttons */
+.ns-fintech main button:active:not(:disabled) {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove temporary selected text highlight when clicking nav */
+.ns-fintech .sidebar nav,
+.ns-fintech .ns-topbar {
+  user-select: none;
+}
+
+/* NEURA CLICK EFFECT FIX END */
+
+/* NO BLUE ACTIVE NAV START */
+
+/* Selected navigation - neutral gray, NO BLUE */
+
+body.ns-fintech .sidebar nav a.nav-item.active,
+body.ns-fintech .sidebar nav a.nav-item[aria-current="page"],
+body.ns-fintech .sidebar nav a.nav-item.active:hover,
+body.ns-fintech .sidebar nav a.nav-item[aria-current="page"]:hover,
+body.ns-fintech .sidebar nav a.nav-item.active:active,
+body.ns-fintech .sidebar nav a.nav-item[aria-current="page"]:active,
+body.ns-fintech .sidebar nav a.nav-item.active:focus,
+body.ns-fintech .sidebar nav a.nav-item[aria-current="page"]:focus {
+    background: #eef1f5 !important;
+    background-image: none !important;
+    color: #263548 !important;
+    border: 1px solid #e0e5eb !important;
+    border-left: 3px solid #64748b !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Icon inside selected navigation */
+
+body.ns-fintech .sidebar nav a.nav-item.active .nav-icon,
+body.ns-fintech .sidebar nav a.nav-item[aria-current="page"] .nav-icon {
+    color: #263548 !important;
+}
+
+/* Neutral keyboard focus */
+
+body.ns-fintech .sidebar nav a.nav-item:focus-visible {
+    outline: 2px solid #64748b !important;
+    outline-offset: 2px;
+}
+
+/* Eliminate blue browser tap flash */
+
+body.ns-fintech .sidebar nav a {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* NO BLUE ACTIVE NAV END */
+
+
+
+
+
+/* STABLE NAVIGATION */
+html.ns-nav-loading .sidebar nav {
+    visibility: visible !important;
+}
+
+body.ns-fintech .sidebar,
+body.ns-fintech .sidebar nav,
+body.ns-fintech .ns-topbar,
+body.ns-fintech .page-header {
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+
+/* =========================================
+   NEURA-SHEET STATIC NAVIGATION v4.0
+   No dark sidebar or blue navigation flash
+   ========================================= */
+
+html body.ns-fintech .sidebar {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #25354c !important;
+  border-right: 1px solid #e3e9f1 !important;
+  box-shadow: 4px 0 22px rgba(20,40,70,.035) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  animation: none !important;
+}
+
+html body.ns-fintech .sidebar .brand {
+  background: #f8fafc !important;
+  border: 1px solid #e4eaf1 !important;
+  box-shadow: none !important;
+}
+
+html body.ns-fintech .sidebar .brand-name {
+  color: #1b2940 !important;
+}
+
+html body.ns-fintech .nav-group-title {
+  color: #7d8da3 !important;
+}
+
+html body.ns-fintech .sidebar nav .nav-item {
+  background: transparent !important;
+  background-image: none !important;
+  color: #42526b !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html body.ns-fintech .sidebar nav .nav-item:hover {
+  background: #f1f4f8 !important;
+  color: #263548 !important;
+}
+
+html body.ns-fintech .sidebar nav .nav-item.active,
+html body.ns-fintech .sidebar nav .nav-item[aria-current="page"],
+html body.ns-fintech .sidebar nav .nav-item.active:hover,
+html body.ns-fintech .sidebar nav .nav-item[aria-current="page"]:hover {
+  background: #eef1f5 !important;
+  background-image: none !important;
+  color: #263548 !important;
+  border: 1px solid #e0e5eb !important;
+  border-left: 3px solid #64748b !important;
+  box-shadow: none !important;
+}
+
+html body.ns-fintech .sidebar nav .nav-item.active .nav-icon,
+html body.ns-fintech .sidebar nav .nav-item[aria-current="page"] .nav-icon {
+  color: #263548 !important;
+}
+
+html body.ns-fintech .sidebar nav .nav-item:focus-visible {
+  outline: 2px solid #64748b !important;
+  outline-offset: 2px;
+}
+
+html body.ns-fintech .sidebar nav .nav-item:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+html body.ns-fintech .sidebar nav {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html body.ns-fintech .ns-topbar {
+  background: #ffffff !important;
+  animation: none !important;
+}
+
+html body.ns-fintech .page-header,
+html body.ns-fintech .panel,
+html body.ns-fintech .stats {
+  animation: none !important;
+}
+
+@media(max-width:950px) {
+  html body.ns-fintech .sidebar {
+    transition: transform .2s ease !important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  html body.ns-fintech .sidebar {
+    transition: none !important;
+  }
+}
+
+/* NEURA LOGO STABILITY START */
+
+body.ns-fintech .sidebar .brand,
+body.ns-fintech .sidebar .brand-logo,
+body.ns-fintech .sidebar .brand-name {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+body.ns-fintech .sidebar .brand-logo {
+    width: 43px !important;
+    height: 43px !important;
+    min-width: 43px;
+    min-height: 43px;
+    flex: 0 0 43px;
+    object-fit: contain;
+}
+
+/* NEURA LOGO STABILITY END */
+
+
+/* SIDEBAR OVERLAP FIX START */
+
+/* Stable full-height sidebar */
+html body.ns-fintech .sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding-bottom: 12px !important;
+}
+
+/* Logo stays at the top */
+html body.ns-fintech .sidebar .brand {
+    flex: 0 0 auto !important;
+}
+
+/* Navigation uses available space and scrolls if needed */
+html body.ns-fintech .sidebar nav {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+    padding-bottom: 12px !important;
+}
+
+/* Keep last navigation item visible */
+html body.ns-fintech .sidebar nav .nav-group:last-child {
+    padding-bottom: 8px !important;
+}
+
+/* Footer gets its own separate space */
+html body.ns-fintech .sidebar .sidebar-note {
+    position: static !important;
+    display: block !important;
+    flex: 0 0 auto !important;
+    margin: 0 8px !important;
+    padding: 12px 7px 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    transform: none !important;
+    clear: both !important;
+    background: transparent !important;
+    color: #73849f !important;
+    border-top: 1px solid #e2e8f0 !important;
+    font-size: 11px !important;
+    line-height: 1.5 !important;
+    white-space: normal !important;
+    z-index: 1 !important;
+}
+
+/* Prevent navigation items from collapsing */
+html body.ns-fintech .sidebar nav .nav-item {
+    position: relative !important;
+    min-height: 43px !important;
+    flex-shrink: 0 !important;
+}
+
+/* SIDEBAR OVERLAP FIX END */

@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Neura-Sheet | Missing Data Checker</title>
@@ -8,27 +9,82 @@
   <link rel="stylesheet" href="css/missing.css">
   <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script defer src="js/missing.js?v=100"></script>
+
+    
+  <link rel="stylesheet" href="css/neura-fintech.css?v=20261010-201534">
+  <link rel="preload" as="image" href="images/Neura.webp" type="image/webp">
 </head>
-<body>
-  <aside class="sidebar">
-    <div class="brand">
-  <img src="images/Neura.webp" alt="Neura-Sheet Logo" class="brand-logo">
-  <span class="brand-name">Neura-Sheet</span>
-</div>
-    <p class="side-label">WORKSPACE</p>
-    <nav>
-      <a href="index.html">Formula Checker</a>
-      <a href="balance.html">Balance Checker</a>
-      <a href="trading.html">Trading & Portfolio</a>
-      <a href="cleaner.html">Data Cleaner</a>
-      <a href="columns.html">Column Fixer</a>
-      <a href="duplicates.html">Duplicate Detector</a>
-      <a class="active" href="missing.html">Missing Data Checker</a>
-          <a href="validation.html">Data Validation</a>
-    </nav>
-  </aside>
+<body class="ns-fintech neura-modern">
+  <aside class="sidebar" id="neura-sidebar">
+  <div class="brand">
+    <img class="brand-logo" src="images/Neura.webp" alt="Neura-Sheet logo" loading="eager" decoding="sync" fetchpriority="high" width="43" height="43">
+    <span class="brand-name">Neura-Sheet</span>
+  </div>
+  <nav aria-label="Main navigation">
+    <div class="nav-group">
+      <span class="nav-group-title">WORKSPACE</span>
+      <a class="nav-item" href="index.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16M8 3v18"/></svg></span>
+        <span>Formula Checker</span>
+      </a>
+      <a class="nav-item" href="balance.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M5 7l-3 6h6l-3-6M19 7l-3 6h6l-3-6M7 21h10"/></svg></span>
+        <span>Balance Checker</span>
+      </a>
+      <a class="nav-item" href="trading.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-9M15 6h6v6"/></svg></span>
+        <span>Trading & Portfolio</span>
+      </a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-title">DATA MANAGEMENT</span>
+      <a class="nav-item" href="cleaner.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14M7 9h10M9 14h6M11 19h2"/></svg></span>
+        <span>Data Cleaner</span>
+      </a>
+      <a class="nav-item" href="columns.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M10 4v16M3 10h18"/></svg></span>
+        <span>Column Fixer</span>
+      </a>
+      <a class="nav-item" href="duplicates.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="13" height="13" rx="2"/><path d="M4 16H3V4a1 1 0 0 1 1-1h12v1"/></svg></span>
+        <span>Duplicate Detector</span>
+      </a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-title">QUALITY CONTROL</span>
+      <a class="nav-item active" aria-current="page" href="missing.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg></span>
+        <span>Missing Data Checker</span>
+      </a>
+      <a class="nav-item" href="validation.html">
+        <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6M4 5h8"/></svg></span>
+        <span>Data Validation</span>
+      </a>
+    </div>
+  </nav>
+  <p class="sidebar-note">Spreadsheet Diagnostic & Repair</p>
+</aside>
 
   <main class="main">
+<div class="ns-topbar">
+  <div class="ns-topbar-left">
+    <button
+      class="ns-menu-btn"
+      id="neura-menu-button"
+      type="button"
+      aria-label="Open navigation"
+      aria-controls="neura-sidebar"
+      aria-expanded="false"
+    >&#9776;</button>
+    <span class="ns-appname">Neura-Sheet</span>
+    <span class="ns-breadcrumb">/ Workspace</span>
+  </div>
+
+  <div class="ns-topbar-right">
+    <span class="ns-top-chip">Spreadsheet Workspace</span>
+  </div>
+</div>
     <header class="page-header">
       <div>
         <p class="eyebrow">NEURA-SHEET / DATA QUALITY</p>
@@ -117,7 +173,25 @@
       </p>
     </section>
   </main>
+  
+  <script defer src="js/neura-fintech.js?v=3"></script>
+  
+  <script defer src="js/neura-mobile-nav.js?v=4-static"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
