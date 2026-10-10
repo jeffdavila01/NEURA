@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neura-Sheet | Smart Column Fixer</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/columns.css">
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script defer src="js/columns.js?v=exportfix2"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+  <img src="images/Neura.webp" alt="Neura-Sheet Logo" class="brand-logo">
+  <span class="brand-name">Neura-Sheet</span>
+</div>
+    <p class="side-label">WORKSPACE</p>
+    <nav>
+      <a href="index.html">Formula Checker</a>
+      <a href="balance.html">Balance Checker</a>
+      <a href="trading.html">Trading & Portfolio</a>
+      <a href="cleaner.html">Data Cleaner</a>
+      <a class="active" href="columns.html">Column Fixer</a>
+          <a href="duplicates.html">Duplicate Detector</a>
+          <a href="missing.html">Missing Data Checker</a>
+          <a href="validation.html">Data Validation</a>
+    </nav>
+    <p class="sidebar-note">Spreadsheet Diagnostic & Repair</p>
+  </aside>
+
+  <main class="main">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">NEURA-SHEET / DATA TOOLS</p>
+        <h1>Smart Column Fixer</h1>
+        <p class="muted">
+          Reorder spreadsheet columns with a safe preview.
+        </p>
+      </div>
+      <span class="version">Version 1.2</span>
+    </header>
+
+    <section class="panel column-panel">
+      <h2>Upload Workbook</h2>
+      <input id="fileInput" type="file" accept=".xlsx,.xls">
+      <p id="fileStatus" role="status" class="muted">
+        No workbook selected.
+      </p>
+    </section>
+
+    <section class="panel column-panel">
+      <h2>Column Configuration</h2>
+      <div class="column-controls">
+        <label>
+          Worksheet
+          <select id="sheetSelect" disabled></select>
+        </label>
+        <label>
+          Header Row Number
+          <input id="headerRow" type="number" min="1" value="1">
+        </label>
+        <label>
+          Column Preset
+          <select id="preset">
+            <option value="customer">Customer / Employee</option>
+            <option value="inventory">Inventory</option>
+            <option value="sales">Sales</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="wide-label" for="desiredOrder">
+        Desired Column Order (separate names with commas)
+      </label>
+      <textarea id="desiredOrder" rows="3">Customer ID, Name, Last Name, Email, Phone, Amount, Signup Date</textarea>
+
+      <div class="column-actions">
+        <button id="analyzeBtn">Analyze Columns</button>
+        <button id="exportBtn" class="secondary" disabled>
+          Export Reordered Excel
+        </button>
+      </div>
+      <p class="muted">
+        Unmatched columns are retained at the end.
+        Export creates a new data-only worksheet.
+      </p>
+      <p id="status" role="status" class="status"></p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <p>Detected Columns</p>
+        <strong id="detectedCount">0</strong>
+      </div>
+      <div class="stat">
+        <p>Matched Columns</p>
+        <strong id="matchedCount">0</strong>
+      </div>
+      <div class="stat">
+        <p>Unmatched Requested</p>
+        <strong id="missingCount">0</strong>
+      </div>
+    </section>
+
+    <section class="panel column-panel">
+      <h2>Column Mapping</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Desired Position</th>
+              <th>Requested Header</th>
+              <th>Detected Source</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="mappingResults">
+            <tr><td colspan="4">No analysis yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel column-panel">
+      <h2>Reordered Data Preview</h2>
+      <p id="previewInfo" class="muted">
+        Analyze your workbook to see the first rows.
+      </p>
+      <div class="table-wrap">
+        <table id="previewTable"></table>
+      </div>
+    </section>
+    <footer>Neura-Sheet • Column Repair Workspace</footer>
+  </main>
+</body>
+</html>
+
+
+
+
+
+
+
+

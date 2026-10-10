@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Neura-Sheet Excel Data Cleaner">
+  <title>Neura-Sheet | Data Cleaner</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/cleaner.css">
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script defer src="js/cleaner.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+  <img src="images/Neura.webp" alt="Neura-Sheet Logo" class="brand-logo">
+  <span class="brand-name">Neura-Sheet</span>
+</div>
+    <p class="side-label">WORKSPACE</p>
+    <nav>
+      <a href="index.html">Formula Checker</a>
+      <a href="balance.html">Balance Checker</a>
+      <a href="trading.html">Trading & Portfolio</a>
+      <a class="active" href="cleaner.html">Data Cleaner</a>
+          <a href="columns.html">Column Fixer</a>
+          <a href="duplicates.html">Duplicate Detector</a>
+          <a href="missing.html">Missing Data Checker</a>
+          <a href="validation.html">Data Validation</a>
+    </nav>
+    <p class="sidebar-note">Spreadsheet Diagnostic & Repair</p>
+  </aside>
+
+  <main class="main">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">NEURA-SHEET / DATA TOOLS</p>
+        <h1>Data Cleaner</h1>
+        <p class="muted">
+          Detect messy text and preview safe cleaning changes.
+        </p>
+      </div>
+      <span class="version">Version 1.1</span>
+    </header>
+
+    <section class="panel cleaner-section">
+      <h2>Upload Spreadsheet</h2>
+      <p class="muted">Select an Excel .xlsx or .xls workbook.</p>
+      <input id="fileInput" type="file" accept=".xlsx,.xls">
+      <p id="fileStatus" class="muted" role="status">
+        Waiting for workbook.
+      </p>
+    </section>
+
+    <section class="panel cleaner-section">
+      <h2>Cleaning Options</h2>
+
+      <div class="option-grid">
+        <label class="option">
+          <input id="trimSpaces" type="checkbox" checked>
+          <span>
+            <strong>Trim Spaces</strong>
+            <small>Remove leading and trailing whitespace.</small>
+          </span>
+        </label>
+
+        <label class="option">
+          <input id="normalizeSpaces" type="checkbox" checked>
+          <span>
+            <strong>Normalize Spaces</strong>
+            <small>Reduce repeated horizontal spaces to one.</small>
+          </span>
+        </label>
+
+        <label class="option">
+          <input id="removeInvisible" type="checkbox" checked>
+          <span>
+            <strong>Remove Invisible Characters</strong>
+            <small>Remove selected control characters.</small>
+          </span>
+        </label>
+
+        <label class="option">
+          <input id="detectBlankRows" type="checkbox" checked>
+          <span>
+            <strong>Detect Empty Rows</strong>
+            <small>Report empty rows without deleting them.</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="cleaner-actions">
+        <div class="sheet-picker">
+          <label for="sheetSelect">Worksheet</label>
+          <select id="sheetSelect" disabled>
+            <option value="__all__">All Worksheets</option>
+          </select>
+        </div>
+
+        <button id="analyzeBtn" type="button">
+          Analyze & Preview
+        </button>
+        <button id="verifyBtn" type="button" class="secondary" disabled>Verify Cleaned Data</button>
+        <button id="downloadBtn" type="button"
+                class="secondary" disabled>
+          Export Cleaned Excel
+        </button>
+      </div>
+
+      <p id="status" class="status" role="status"></p>
+      <p id="verificationStatus" class="verification-status" role="status">Not verified yet.</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <p>Worksheets Analyzed</p>
+        <strong id="sheetCount">0</strong>
+      </div>
+      <div class="stat">
+        <p>Text Cells to Clean</p>
+        <strong id="changeCount">0</strong>
+      </div>
+      <div class="stat">
+        <p>Empty Rows Detected</p>
+        <strong id="blankCount">0</strong>
+      </div>
+    </section>
+
+    <section class="panel cleaner-section">
+      <div class="section-heading">
+        <h2>Cleaning Preview</h2>
+        <span id="previewCount" class="muted">No results</span>
+      </div>
+
+      <p class="muted">
+        Review the proposed changes before exporting.
+        The original workbook remains unchanged.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Worksheet</th>
+              <th>Cell / Row</th>
+              <th>Issue</th>
+              <th>Original Value</th>
+              <th>Cleaned Value</th>
+            </tr>
+          </thead>
+          <tbody id="results">
+            <tr>
+              <td colspan="5">Upload a workbook to begin.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>Neura-Sheet • Data Cleaning Workspace</footer>
+  </main>
+</body>
+</html>
+
+
+
+
+
+

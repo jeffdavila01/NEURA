@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neura-Sheet | Duplicate Detector</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/duplicates.css">
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script defer src="js/duplicates.js?v=130"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+  <img src="images/Neura.webp" alt="Neura-Sheet Logo" class="brand-logo">
+  <span class="brand-name">Neura-Sheet</span>
+</div>
+    <p class="side-label">WORKSPACE</p>
+    <nav>
+      <a href="index.html">Formula Checker</a>
+      <a href="balance.html">Balance Checker</a>
+      <a href="trading.html">Trading & Portfolio</a>
+      <a href="cleaner.html">Data Cleaner</a>
+      <a href="columns.html">Column Fixer</a>
+      <a class="active" href="duplicates.html">Duplicate Detector</a>
+          <a href="missing.html">Missing Data Checker</a>
+          <a href="validation.html">Data Validation</a>
+    </nav>
+    <p class="sidebar-note">Spreadsheet Diagnostic & Repair</p>
+  </aside>
+
+  <main class="main">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">NEURA-SHEET / DATA TOOLS</p>
+        <h1>Duplicate Detector</h1>
+        <p class="muted">Find and review duplicate Excel records.</p>
+      </div>
+      <span class="version">Version 1.3</span>
+    </header>
+
+    <section class="panel block">
+      <h2>Upload Excel Workbook</h2>
+      <input type="file" id="fileInput" accept=".xlsx,.xls">
+      <p id="fileStatus" class="muted" role="status">No file selected.</p>
+    </section>
+
+    <section class="panel block">
+      <h2>Duplicate Settings</h2>
+
+      <div class="controls">
+        <label>
+          Worksheet
+          <select id="sheetSelect" disabled></select>
+        </label>
+        <label>
+          Header Row
+          <input id="headerRow" type="number" min="1" value="1">
+        </label>
+      </div>
+
+      <h3>Select Matching Columns</h3>
+      <p class="muted">
+        Choose the fields used to identify duplicate records.
+      </p>
+            <div class="controls">
+        <label>
+          Detection Mode
+          <select id="duplicateMode">
+            <option value="exact">Exact Duplicate</option>
+            <option value="key">Duplicate Key / Conflicts</option>
+            <option value="fuzzy">Possible Name Duplicates</option>
+          </select>
+        </label>
+      </div>
+      <div id="similaritySettings" style="margin:15px 0;display:none">
+  <label for="similarityThreshold">
+    Minimum Name Similarity:
+    <strong id="thresholdValue">80%</strong>
+  </label>
+  <input
+    type="range"
+    id="similarityThreshold"
+    min="60"
+    max="100"
+    value="80"
+    step="5"
+    style="display:block;width:100%;max-width:420px;margin-top:12px"
+  >
+  <p class="muted">
+    Higher percentage means stricter name matching.
+  </p>
+</div>
+      <p class="muted" id="modeInfo">
+        Exact mode compares every selected matching column.
+      </p>
+      <div id="keyColumns" class="keys"></div>
+
+      <label class="option">
+        <input type="checkbox" id="normalizeText" checked>
+        Ignore text case and extra spaces
+      </label>
+
+      <label class="option">
+        <input type="checkbox" id="skipEmpty" checked>
+        Ignore records with all matching fields blank
+      </label>
+
+      <div class="actions">
+        <button id="analyzeBtn" type="button">Find Duplicates</button>
+        <button id="exportBtn" class="secondary" type="button" disabled>
+          Export Cleaned Excel
+        </button>
+      </div>
+      <p id="status" role="status" class="status"></p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <p>Records Scanned</p>
+        <strong id="totalRows">0</strong>
+      </div>
+      <div class="stat">
+        <p>Duplicate Records</p>
+        <strong id="duplicateCount">0</strong>
+      </div>
+      <div class="stat">
+        <p>Records to Keep</p>
+        <strong id="uniqueCount">0</strong>
+      </div>
+    </section>
+
+    <section class="panel block">
+      <h2>Duplicate Results</h2>
+      <p id="resultCount" class="muted">No results yet.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Duplicate Row</th>
+              <th>Matches Row</th>
+              <th>Matching Values</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="results">
+            <tr><td colspan="4">Upload a workbook to begin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+
+
+
+
+
+

@@ -1,0 +1,155 @@
+﻿.block { margin-top: 20px; margin-bottom: 20px; }
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.controls label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.controls select,
+.controls input {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+  background: white;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.key {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.block td {
+  overflow-wrap: anywhere;
+  max-width: 320px;
+}
+
+@media(max-width:700px) {
+  .controls { grid-template-columns: 1fr; }
+  .actions button { width: 100%; }
+}
+
+/* Duplicate Detector v1.3 */
+.review-panel {
+  margin: 20px 0;
+}
+
+.review-item {
+  border: 1px solid #dce3eb;
+  border-radius: 12px;
+  padding: 18px;
+  margin: 15px 0;
+  background: #f8fafc;
+}
+
+.review-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.review-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+
+.review-record {
+  padding: 12px;
+  background: white;
+  border: 1px solid #dce3eb;
+  border-radius: 9px;
+  min-width: 0;
+}
+
+.review-field {
+  padding: 8px 0;
+  border-bottom: 1px solid #edf1f5;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.review-field strong {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.review-different {
+  background: #fff4e6;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.review-decision {
+  margin-top: 15px;
+  display: grid;
+  gap: 8px;
+}
+
+.review-decision select {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+
+.review-summary {
+  padding: 15px;
+  background: #eef5ff;
+  border: 1px solid #cbdffa;
+  border-radius: 9px;
+  margin: 15px 0;
+  line-height: 1.7;
+}
+
+.review-warning {
+  color: #a52834;
+  font-weight: 600;
+}
+
+@media (max-width: 750px) {
+  .review-comparison {
+    grid-template-columns: 1fr;
+  }
+}

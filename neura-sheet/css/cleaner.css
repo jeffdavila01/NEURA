@@ -1,0 +1,148 @@
+﻿.cleaner-section {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+  margin: 22px 0;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border, #dce3eb);
+  border-radius: 10px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.option input {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: #2563eb;
+}
+
+.option span {
+  display: grid;
+  gap: 6px;
+}
+
+.option strong {
+  font-size: 14px;
+}
+
+.option small {
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.cleaner-actions {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 13px;
+}
+
+.sheet-picker {
+  display: grid;
+  gap: 8px;
+  min-width: 230px;
+}
+
+.sheet-picker label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sheet-picker select {
+  padding: 11px;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+  background: white;
+  color: #1b2838;
+}
+
+.cleaner-section td {
+  overflow-wrap: anywhere;
+  max-width: 280px;
+}
+
+.cleaner-section .table-wrap {
+  margin-top: 15px;
+}
+
+#status {
+  margin-top: 14px;
+}
+
+@media (max-width: 700px) {
+  .option-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cleaner-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sheet-picker,
+  .cleaner-actions button {
+    width: 100%;
+  }
+}
+
+/* SheetFix Data Cleaner v1.1 */
+.cleaner-value {
+  display: block;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 9px;
+  border-radius: 7px;
+  line-height: 1.7;
+}
+
+.cleaner-before {
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.cleaner-after {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.cleaner-legend {
+  margin: 12px 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.verification-status {
+  padding: 13px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #475569;
+  margin-top: 12px;
+}
+
+.verification-status.passed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.verification-status.failed {
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.cleaner-section td {
+  vertical-align: top;
+}

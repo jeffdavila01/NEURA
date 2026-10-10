@@ -1,0 +1,132 @@
+﻿.column-panel {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.column-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.column-controls label,
+.wide-label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.column-controls input,
+.column-controls select,
+#desiredOrder {
+  width: 100%;
+  border: 1px solid var(--border, #dce3eb);
+  border-radius: 8px;
+  padding: 12px;
+  background: white;
+  color: #1b2838;
+  font: inherit;
+}
+
+#desiredOrder {
+  display: block;
+  margin: 10px 0 20px;
+  resize: vertical;
+}
+
+.column-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+#previewTable {
+  min-width: 500px;
+}
+
+#previewTable th {
+  white-space: nowrap;
+}
+
+#previewTable td {
+  max-width: 250px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 800px) {
+  .column-controls {
+    grid-template-columns: 1fr;
+  }
+  .column-actions button {
+    width: 100%;
+  }
+}
+
+/* Interactive Column Mapping v1.1 */
+.mapping-editor {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.mapping-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.mapping-item {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr) minmax(0,1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #dce3eb;
+  border-radius: 10px;
+}
+
+.mapping-item select,
+.mapping-item input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: white;
+  color: #1b2838;
+}
+
+.mapping-position {
+  text-align: center;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.mapping-buttons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.mapping-buttons button {
+  padding: 8px 10px;
+}
+
+.mapping-status {
+  color: #475569;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .mapping-item {
+    grid-template-columns: 30px minmax(0,1fr);
+  }
+
+  .mapping-buttons {
+    grid-column: 2;
+  }
+}

@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Neura-Sheet | Missing Data Checker</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/missing.css">
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script defer src="js/missing.js?v=100"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+  <img src="images/Neura.webp" alt="Neura-Sheet Logo" class="brand-logo">
+  <span class="brand-name">Neura-Sheet</span>
+</div>
+    <p class="side-label">WORKSPACE</p>
+    <nav>
+      <a href="index.html">Formula Checker</a>
+      <a href="balance.html">Balance Checker</a>
+      <a href="trading.html">Trading & Portfolio</a>
+      <a href="cleaner.html">Data Cleaner</a>
+      <a href="columns.html">Column Fixer</a>
+      <a href="duplicates.html">Duplicate Detector</a>
+      <a class="active" href="missing.html">Missing Data Checker</a>
+          <a href="validation.html">Data Validation</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">NEURA-SHEET / DATA QUALITY</p>
+        <h1>Missing Data Checker</h1>
+        <p class="muted">
+          Locate blank required fields and safely fill missing values.
+        </p>
+      </div>
+      <span class="version">Version 1.0</span>
+    </header>
+
+    <section class="panel missing-panel">
+      <h2>Upload Spreadsheet</h2>
+      <input id="fileInput" type="file" accept=".xlsx,.xls">
+      <p id="fileStatus" class="muted">No workbook selected.</p>
+    </section>
+
+    <section class="panel missing-panel">
+      <h2>Analysis Settings</h2>
+      <div class="missing-controls">
+        <label>Worksheet
+          <select id="sheetSelect" disabled></select>
+        </label>
+        <label>Header Row
+          <input id="headerRow" type="number" min="1" value="1">
+        </label>
+      </div>
+
+      <h3>Required Columns</h3>
+      <p class="muted">
+        Select columns where empty values should be reported.
+      </p>
+      <div id="requiredColumns" class="required-grid"></div>
+
+      <div class="missing-actions">
+        <button id="analyzeBtn" type="button">Check Missing Data</button>
+        <button id="verifyBtn" class="secondary" disabled>
+          Verify Corrections
+        </button>
+        <button id="exportBtn" class="secondary" disabled>
+          Export Corrected Excel
+        </button>
+      </div>
+      <p id="status" role="status" class="status"></p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <p>Records Scanned</p>
+        <strong id="totalRows">0</strong>
+      </div>
+      <div class="stat">
+        <p>Missing Fields</p>
+        <strong id="missingCount">0</strong>
+      </div>
+      <div class="stat">
+        <p>Remaining Issues</p>
+        <strong id="remainingCount">0</strong>
+      </div>
+    </section>
+
+    <section class="panel missing-panel">
+      <h2>Missing Data Review</h2>
+      <p id="resultInfo" class="muted">
+        Choose a worksheet and check required columns.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Excel Row</th>
+              <th>Cell</th>
+              <th>Required Field</th>
+              <th>Current Value</th>
+              <th>Correction</th>
+            </tr>
+          </thead>
+          <tbody id="results">
+            <tr><td colspan="5">No analysis yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted">
+        Fill only values you know are correct. Remaining missing
+        values can be left unchanged.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
+
+

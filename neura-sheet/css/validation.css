@@ -1,0 +1,84 @@
+﻿.validation-panel {
+  margin: 20px 0;
+}
+
+.validation-controls {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 15px;
+  margin: 18px 0;
+}
+
+.validation-controls label,
+.rule-item {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.validation-controls input,
+.validation-controls select,
+.rule-item select,
+.validation-input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+  background: white;
+  color: #1b2838;
+  font: inherit;
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.rule-item {
+  border: 1px solid #dce3eb;
+  border-radius: 10px;
+  padding: 13px;
+  background: #f8fafc;
+}
+
+.rule-name {
+  overflow-wrap: anywhere;
+}
+
+.validation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.validation-panel table {
+  min-width: 900px;
+}
+
+.validation-panel td {
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  max-width: 270px;
+}
+
+.validation-input {
+  min-width: 160px;
+}
+
+.validation-ok { color: #15803d; font-weight: 600; }
+.validation-error { color: #be123c; font-weight: 600; }
+.validation-pending { color: #64748b; }
+
+@media(max-width:750px) {
+  .validation-controls {
+    grid-template-columns: 1fr;
+  }
+  .validation-actions button {
+    width: 100%;
+  }
+}

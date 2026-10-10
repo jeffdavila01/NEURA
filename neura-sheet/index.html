@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Neura-Sheet spreadsheet diagnostic dashboard">
+  <title>Neura-Sheet | Formula Checker</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script defer src="js/app.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+  <img src="images/Neura.webp" alt="Neura-Sheet Logo" class="brand-logo">
+  <span class="brand-name">Neura-Sheet</span>
+</div>
+    <p class="side-label">WORKSPACE</p>
+    <nav>
+      <a class="active" href="index.html">Formula Checker</a>
+      <a href="balance.html">Balance Checker</a>
+          <a href="trading.html">Trading & Portfolio</a>
+          <a href="cleaner.html">Data Cleaner</a>
+          <a href="columns.html">Column Fixer</a>
+          <a href="duplicates.html">Duplicate Detector</a>
+          <a href="missing.html">Missing Data Checker</a>
+          <a href="validation.html">Data Validation</a>
+    </nav>
+    <p class="sidebar-note">Spreadsheet Diagnostic &amp; Repair</p>
+  </aside>
+
+  <main class="main">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">NEURA-SHEET / WORKSPACE</p>
+        <h1>Formula Checker</h1>
+        <p class="muted">Inspect workbook formulas and locate suspicious gaps.</p>
+      </div>
+      <span class="version">Version 1.0</span>
+    </header>
+
+    <section class="panel upload-panel">
+      <h2>Upload Spreadsheet</h2>
+      <p class="muted">Choose an Excel workbook (.xlsx or .xls).</p>
+      <input id="fileInput" type="file" accept=".xlsx,.xls">
+      <button id="analyzeBtn" type="button">Analyze Spreadsheet</button>
+      <p id="status" class="status" role="status"></p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <p>Total Sheets</p>
+        <strong id="totalSheets">0</strong>
+      </div>
+      <div class="stat">
+        <p>Formula Cells</p>
+        <strong id="totalFormulas">0</strong>
+      </div>
+      <div class="stat">
+        <p>Issues Found</p>
+        <strong id="totalIssues">0</strong>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <h2>Formula Analysis</h2>
+        <button id="exportBtn" class="secondary" disabled>Export Report</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Sheet</th>
+              <th>Cell</th>
+              <th>Issue</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="results">
+            <tr><td colspan="4">Upload a workbook to begin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <footer>Neura-Sheet • Spreadsheet Analysis Workspace</footer>
+  </main>
+</body>
+</html>
+
+
+
+
+
+
+
