@@ -1,400 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Dashboard | NEURA</title>
-
-    <link rel="icon" type="image/png" href="images/neura.png">
-
-    <link rel="stylesheet" href="css/style.css">
-
-    <script src="js/app.js" defer></script>
-    <script src="js/excel-system.js" defer></script>
-    <script src="js/excel-modules.js" defer></script>
-    <script src="js/baseline-hover.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10110f">
+  <title>Neura Photography - Photo Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-
+  <div class="app-shell">
     <aside class="sidebar">
-
-        <div class="brand">
-
-            <div class="brand-icon">
-                <img src="images/neura.png" alt="NEURA Logo">
-            </div>
-
-            <div>
-                <h2>NEURA</h2>
-            </div>
-
-        </div>
-
-
-        <nav class="sidebar-nav">
-
-            <a href="index.html" class="nav-link active">
-                <span class="nav-icon">▦</span>
-                <span>Dashboard</span>
-            </a>
-
-            <a href="chart-of-accounts.html" class="nav-link">
-                <span class="nav-icon">▤</span>
-                <span>Chart of Accounts</span>
-            </a>
-
-            <a href="purchase-journal.html" class="nav-link">
-                <span class="nav-icon">↓</span>
-                <span>Purchase Journal</span>
-            </a>
-
-            <a href="sales-journal.html" class="nav-link">
-                <span class="nav-icon">↑</span>
-                <span>Sales Journal</span>
-            </a>
-
-            <a href="supplier.html" class="nav-link">
-                <span class="nav-icon">♙</span>
-                <span>Supplier</span>
-            </a>
-
-            <a href="customer.html" class="nav-link">
-                <span class="nav-icon">♙</span>
-                <span>Customer</span>
-            </a>
-
-            <a href="administrator.html" class="nav-link">
-                <span class="nav-icon">⚙</span>
-                <span>Administrator</span>
-            </a>
-
-        </nav>
-
-
-        <div class="sidebar-footer">
-
-            <p>Account System</p>
-
-            <small>Version 1.0</small>
-
-        </div>
-
+      <a class="brand" href="#" aria-label="Neura Photography home">
+        <span class="brand-mark"><img src="neura-mark.svg" alt=""></span>
+        <span class="brand-copy"><strong>Neura</strong><small>PHOTOGRAPHY</small></span>
+      </a>
+      <button class="new-project" id="uploadButton"><span>+</span> New project <kbd>Ctrl O</kbd></button>
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-item active" href="#"><span class="nav-icon">&#9635;</span> Studio</a>
+        <a class="nav-item" href="#presets"><span class="nav-icon">&#9672;</span> Presets <span class="nav-count">12</span></a>
+        <a class="nav-item" href="#"><span class="nav-icon">&#9633;</span> Your projects <span class="nav-count">0</span></a>
+      </nav>
+      <div class="sidebar-bottom"><div class="plan-card"><div class="plan-icon">&#10022;</div><strong>Your creative space</strong><p>All your edits, in one place.</p><div class="storage"><span></span></div><small>Local workspace - private by design</small></div><button class="profile"><span class="avatar">N</span><span><strong>Neura Studio</strong><small>Personal workspace</small></span><span class="dots">...</span></button></div>
     </aside>
 
-
-    <main class="main-content">
-
-        <header class="topbar">
-
-            <div>
-
-                <h1>Dashboard</h1>
-
-                <p>
-                    Overview of your accounting system
-                </p>
-
-            </div>
-
-
-            <div class="admin-profile">
-
-                <div class="admin-avatar">
-                    AD
-                </div>
-
-                <div>
-
-                    <strong>
-                        Administrator
-                    </strong>
-
-                    <span>
-                        System Admin
-                    </span>
-
-                </div>
-
-            </div>
-
-        </header>
-
-
-        <section class="dashboard-cards">
-
-            <article class="stat-card">
-
-                <div class="stat-header">
-
-                    <span>Total Sales</span>
-
-                    <div class="stat-icon">
-                        ₱
-                    </div>
-
-                </div>
-
-                <h2 id="dashboardTotalSales">
-                    ₱0.00
-                </h2>
-
-                <p id="dashboardSalesCount">
-                    0 sales transactions
-                </p>
-
-            </article>
-
-
-            <article class="stat-card">
-
-                <div class="stat-header">
-
-                    <span>Total Purchases</span>
-
-                    <div class="stat-icon">
-                        ↓
-                    </div>
-
-                </div>
-
-                <h2 id="dashboardTotalPurchases">
-                    ₱0.00
-                </h2>
-
-                <p id="dashboardPurchaseCount">
-                    0 purchase transactions
-                </p>
-
-            </article>
-
-
-            <article class="stat-card">
-
-                <div class="stat-header">
-
-                    <span>Customers</span>
-
-                    <div class="stat-icon">
-                        C
-                    </div>
-
-                </div>
-
-                <h2 id="dashboardCustomerCount">
-                    0
-                </h2>
-
-                <p>
-                    Registered customers
-                </p>
-
-            </article>
-
-
-            <article class="stat-card">
-
-                <div class="stat-header">
-
-                    <span>Suppliers</span>
-
-                    <div class="stat-icon">
-                        S
-                    </div>
-
-                </div>
-
-                <h2 id="dashboardSupplierCount">
-                    0
-                </h2>
-
-                <p>
-                    Registered suppliers
-                </p>
-
-            </article>
-
+    <main class="main-area">
+      <header class="topbar"><div class="breadcrumbs"><span>Studio</span><span class="crumb-slash">/</span><strong id="projectTitle">Untitled project</strong></div><div class="top-actions"><button class="history-button" id="undoButton" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>&#8630;</button><button class="history-button" id="redoButton" title="Redo (Ctrl+Shift+Z)" aria-label="Redo" disabled>&#8631;</button><span class="saved-status" id="savedStatus"><i></i> Saved on this device</span><button class="button subtle" id="resetButton">Reset</button><button class="button export" id="exportButton">Export image <span>&#8599;</span></button></div></header>
+      <section class="editor-layout">
+        <section class="canvas-column">
+          <div class="canvas-toolbar"><div class="tool-group"><button class="tool-button selected" title="Select">&#8598;</button><button class="tool-button" title="Crop" id="cropButton">&#9633;</button><button class="tool-button" title="Add text" id="textToolButton">T</button><button class="tool-button" title="Rotate left" id="rotateLeft">&#8630;</button><button class="tool-button" title="Rotate right" id="rotateRight">&#8631;</button><button class="tool-button" title="Flip horizontally" id="flipImage">&#8596;</button></div><div class="canvas-meta"><span id="imageDimensions">No image loaded</span><span class="meta-divider"></span><button id="zoomButton">Fit &#9662;</button></div></div>
+          <div class="canvas-stage" id="dropZone">
+            <div class="empty-state" id="emptyState"><div class="empty-icon"><svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="28" rx="4"/><circle cx="17" cy="20" r="3"/><path d="m8 34 10-9 7 6 6-5 9 9"/></svg></div><h1>Make a little more of the moment.</h1><p>Drop a photo or video here, or choose one to start editing.</p><button class="button upload-cta" id="canvasUpload">Choose media <span>&#8593;</span></button><span class="file-hint">Photos and videos - up to 500 MB</span></div>
+            <img id="photo" alt="Your photo preview" hidden>
+            <video id="videoPreview" controls playsinline hidden></video><img id="timelineClipImage" class="timeline-media-preview" alt="Timeline media preview" hidden><video id="timelineClipVideo" class="timeline-media-preview" playsinline muted hidden></video><audio id="musicPreview" preload="auto" hidden></audio>
+            <div class="video-title-preview" id="videoTitlePreview" hidden></div>
+            <div class="text-layer" id="textLayer"></div>
+            <div class="canvas-overlay" id="canvasOverlay" hidden><span>BEFORE</span></div>
+            <div class="crop-toolbar" id="cropToolbar" hidden><span>Crop ratio</span><button data-ratio="free" class="active">Free</button><button data-ratio="1">1:1</button><button data-ratio="4/3">4:3</button><button data-ratio="3/2">3:2</button><button data-ratio="16/9">16:9</button><button class="crop-done" id="cropDone">Done</button></div>
+            <div class="drop-overlay" id="dropOverlay"><span>Drop your photo to begin</span></div>
+            <button class="compare-button" id="compareButton" hidden>Hold to compare <kbd>\</kbd></button>
+          </div>
+          <section class="text-timeline" id="textTimeline" hidden><div class="timeline-heading"><strong>EDIT TIMELINE</strong><div class="timeline-actions"><button id="timelinePlayButton" type="button" aria-label="Play timeline">&#9654;</button><span class="timeline-timecode"><span id="timelineCurrentTime">0:00.0</span><span>/</span><span id="timelineDuration">0:00</span></span><button id="addMusic" type="button">+ Add music</button><button id="browseMusic" type="button">Browse music</button><button id="browseEffects" type="button">+ Effects</button><input id="musicPicker" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" multiple hidden></div></div><div class="music-label" id="musicLabel" hidden><span id="musicName">Music</span><button id="removeMusic" type="button" aria-label="Remove all music">Remove all</button></div><div class="effect-properties" id="effectProperties" hidden><strong id="effectSelectedName">Effect</strong><div class="effect-fields"><label>Start <input id="effectStart" type="number" min="0" step="0.1"></label><label>End <input id="effectEnd" type="number" min="0.1" step="0.1"></label><label>Strength <input id="effectIntensity" type="range" min="0.2" max="1" step="0.05" value="0.7"></label><button id="removeEffect" type="button">Remove</button></div></div><div class="media-clip-properties" id="mediaClipProperties" hidden><strong id="mediaClipSelectedName">Media clip</strong><div class="media-clip-fields"><label>Start <input id="mediaClipStart" type="number" min="0" step="0.1"></label><label>End <input id="mediaClipEnd" type="number" min="0.1" step="0.1"></label><button id="splitMediaClip" type="button">Split at playhead</button><button id="deleteMediaClip" type="button">Delete clip</button></div></div><div class="timeline-ruler" id="timelineRuler"></div><div class="timeline-tracks" id="timelineTracks"></div></section>          <div class="filmstrip"><div class="filmstrip-title"><span>PROJECT MEDIA</span><button id="addMedia">+ Add media</button></div><div class="media-empty" id="mediaEmpty"><span>&#9635;</span> Your imported photos and videos will appear here</div><div class="media-item" id="mediaItem" hidden><img id="thumb" alt="Imported photo thumbnail"><span class="video-thumb" id="videoThumb" hidden>&#9654;</span><span id="thumbName"></span><button id="removeMedia" title="Remove media">&#215;</button></div><div class="media-library-heading"><strong>Media library</strong><span id="mediaAssetCount">0</span></div><div id="mediaLibrary" class="media-library"></div><div id="mediaSelectionInfo" class="media-selection-info" hidden><img id="selectedMediaPreview" alt="Selected media preview" hidden><div><strong id="selectedMediaName"></strong><small id="selectedMediaMeta"></small></div><label id="imageDurationControl" hidden>Default image duration<input id="imageClipDuration" type="number" min="0.2" max="60" step="0.5" value="5">s</label><button id="addSelectedMediaToTimeline" type="button" disabled>Add to Timeline</button></div></div>
         </section>
 
-
-        <section class="dashboard-grid">
-
-            <div class="panel">
-
-                <div class="panel-header">
-
-                    <div>
-
-                        <h2>
-                            Recent Transactions
-                        </h2>
-
-                        <p>
-                            Latest sales and purchase transactions
-                        </p>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        class="secondary-btn"
-                        id="dashboardRefreshBtn"
-                    >
-                        Refresh
-                    </button>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-
-                                <th>Date</th>
-
-                                <th>Reference</th>
-
-                                <th>Type</th>
-
-                                <th>Account</th>
-
-                                <th>Amount</th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="transactionTable">
-
-                            <tr class="empty-row">
-
-                                <td colspan="5">
-                                    Loading transactions...
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-
-            <div class="panel">
-
-                <div class="panel-header">
-
-                    <div>
-
-                        <h2>
-                            Quick Actions
-                        </h2>
-
-                        <p>
-                            Frequently used functions
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="quick-actions">
-
-                    <a href="sales-journal.html" class="action-card">
-
-                        <span>＋</span>
-
-                        <div>
-
-                            <strong>
-                                New Sale
-                            </strong>
-
-                            <small>
-                                Create sales transaction
-                            </small>
-
-                        </div>
-
-                    </a>
-
-
-                    <a href="purchase-journal.html" class="action-card">
-
-                        <span>＋</span>
-
-                        <div>
-
-                            <strong>
-                                New Purchase
-                            </strong>
-
-                            <small>
-                                Create purchase transaction
-                            </small>
-
-                        </div>
-
-                    </a>
-
-
-                    <a href="customer.html" class="action-card">
-
-                        <span>＋</span>
-
-                        <div>
-
-                            <strong>
-                                Add Customer
-                            </strong>
-
-                            <small>
-                                Register new customer
-                            </small>
-
-                        </div>
-
-                    </a>
-
-
-                    <a href="supplier.html" class="action-card">
-
-                        <span>＋</span>
-
-                        <div>
-
-                            <strong>
-                                Add Supplier
-                            </strong>
-
-                            <small>
-                                Register new supplier
-                            </small>
-
-                        </div>
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-
+        <aside class="inspector"><div class="inspector-heading"><div><span class="eyebrow">PHOTO EDITOR</span><h2>Adjust</h2></div><button class="more-button" aria-label="More options">...</button></div>
+          <div class="inspector-tabs"><button class="tab active" data-tab="adjust">Adjust</button><button class="tab" data-tab="presets">Presets <span>12</span></button></div>
+          <div class="video-notice" id="videoNotice" hidden><span>&#9654;</span><div class="video-tools"><strong>Video clip</strong><p>Pick a look, add a title, and set the section you want to export. The original stays available from the top bar.</p><label class="original-audio-toggle"><input id="muteOriginalAudio" type="checkbox"> Mute original video audio</label><small class="original-audio-help">Mutes all sound from the imported video. Timeline music stays on.</small><label class="look-select-label" for="videoLook">Video look</label><select id="videoLook" class="video-look"><option value="original">Original</option><option value="warm">Warm</option><option value="cool">Cool</option><option value="mono">Mono</option><option value="film">Film</option></select><label class="look-select-label" for="videoEffect">Effect</label><select id="videoEffect" class="video-look"><option value="none">None</option><option value="softGlow">Soft glow</option><option value="vintage">Vintage</option><option value="vivid">Vivid</option></select><label class="look-select-label" for="videoTransition">Transition</label><select id="videoTransition" class="video-look"><option value="none">None</option><option value="fade">Fade in and out</option><option value="wipe">Wipe in and out</option><option value="zoom">Zoom transition</option><option value="blur">Blur transition</option></select><label class="look-select-label" for="videoTitle">Title overlay</label><input id="videoTitle" class="video-title-input" type="text" maxlength="60" placeholder="Add a title (optional)"><select id="videoTitlePosition" class="video-look title-position"><option value="bottom">Bottom</option><option value="center">Center</option><option value="top">Top</option></select><div class="text-timing" id="textTiming" hidden><strong>Selected text timing</strong><label class="text-animation-label" for="textAnimation">Entrance animation</label><select id="textAnimation" class="video-look"><option value="none">None</option><option value="fade">Fade in</option><option value="pop">Pop</option><option value="zoom">Zoom in</option><option value="slideUp">Slide up</option><option value="slideDown">Slide down</option><option value="custom">Custom effect</option></select><div class="trim-fields"><label>Show from <span>s</span><input id="textStart" type="number" min="0" step="0.1" value="0"></label><label>Hide at <span>s</span><input id="textEnd" type="number" min="0.1" step="0.1" value="0"></label></div><small id="textDuration">Duration: 0.0s</small><small>Timing is based on the original video timeline.</small><button class="button keyframe-button" id="addTextKeyframe" type="button">Add keyframe at playhead</button><small id="keyframeStatus">Move the playhead and add another keyframe to animate text.</small></div><div class="trim-fields"><label>Start <span>s</span><input id="trimStart" type="number" min="0" step="0.1" value="0"></label><label>End <span>s</span><input id="trimEnd" type="number" min="0.1" step="0.1" value="0"></label></div><button class="button split-at-playhead" id="splitAtPlayhead">Split at playhead</button><div class="split-list" id="splitList" hidden></div><button class="button trim-export" id="trimExport">Export trimmed clip <span>&#8599;</span></button><small id="trimStatus" aria-live="polite">Exports as WebM in this browser.</small></div></div>
+          <section class="text-inspector" id="textInspector" hidden>
+            <div class="text-inspector-heading"><span class="eyebrow">TEXT EDITOR</span><strong>Style selected text</strong></div>
+            <label class="text-control">Font family<select data-text-property="fontFamily"><option value="Arial">Arial</option><option value="Roboto">Roboto</option><option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option><option value="Inter">Inter</option><option value="Open Sans">Open Sans</option><option value="Lato">Lato</option><option value="Nunito">Nunito</option><option value="Raleway">Raleway</option><option value="Oswald">Oswald</option><option value="Bebas Neue">Bebas Neue</option><option value="DM Sans">DM Sans</option><option value="Manrope">Manrope</option><option value="Ubuntu">Ubuntu</option><option value="Quicksand">Quicksand</option><option value="Playfair Display">Playfair Display</option><option value="Merriweather">Merriweather</option><option value="Georgia">Georgia</option><option value="Times New Roman">Times New Roman</option><option value="Cormorant Garamond">Cormorant Garamond</option><option value="Cinzel">Cinzel</option><option value="Libre Baskerville">Libre Baskerville</option><option value="Dancing Script">Dancing Script</option><option value="Great Vibes">Great Vibes</option><option value="Pacifico">Pacifico</option><option value="Sacramento">Sacramento</option><option value="Satisfy">Satisfy</option><option value="Caveat">Caveat</option><option value="Lobster">Lobster</option><option value="Abril Fatface">Abril Fatface</option><option value="Anton">Anton</option><option value="Archivo">Archivo</option><option value="Work Sans">Work Sans</option><option value="Fira Sans">Fira Sans</option><option value="Source Sans 3">Source Sans 3</option><option value="PT Sans">PT Sans</option><option value="Rubik">Rubik</option><option value="Outfit">Outfit</option><option value="Space Grotesk">Space Grotesk</option><option value="Plus Jakarta Sans">Plus Jakarta Sans</option><option value="Josefin Sans">Josefin Sans</option><option value="IBM Plex Sans">IBM Plex Sans</option><option value="Exo 2">Exo 2</option><option value="Orbitron">Orbitron</option><option value="Rajdhani">Rajdhani</option><option value="Teko">Teko</option><option value="Titillium Web">Titillium Web</option><option value="Comfortaa">Comfortaa</option><option value="Righteous">Righteous</option><option value="Special Elite">Special Elite</option><option value="Fira Code">Fira Code</option><option value="JetBrains Mono">JetBrains Mono</option><option value="Source Code Pro">Source Code Pro</option><option value="Courier New">Courier New</option><option value="Consolas">Consolas</option><option value="Inconsolata">Inconsolata</option><option value="Roboto Slab">Roboto Slab</option><option value="Zilla Slab">Zilla Slab</option><option value="Bitter">Bitter</option><option value="Arvo">Arvo</option><option value="Lora">Lora</option><option value="Spectral">Spectral</option><option value="Vollkorn">Vollkorn</option><option value="Old Standard TT">Old Standard TT</option><option value="Bodoni Moda">Bodoni Moda</option><option value="DM Serif Display">DM Serif Display</option><option value="Fraunces">Fraunces</option><option value="Yeseva One">Yeseva One</option><option value="Prata">Prata</option><option value="Tenor Sans">Tenor Sans</option><option value="Marcellus">Marcellus</option><option value="Cardo">Cardo</option><option value="Alegreya">Alegreya</option><option value="Amatic SC">Amatic SC</option><option value="Patrick Hand">Patrick Hand</option><option value="Indie Flower">Indie Flower</option><option value="Permanent Marker">Permanent Marker</option><option value="Kalam">Kalam</option><option value="Shadows Into Light">Shadows Into Light</option><option value="Architects Daughter">Architects Daughter</option></select></label>
+            <div class="text-control-pair"><label class="text-control">Font size<input type="number" min="8" max="160" step="1" data-text-property="fontSize"></label><label class="text-control">Font weight<select data-text-property="fontWeight"><option value="300">Thin</option><option value="400">Regular</option><option value="600">Bold</option><option value="700">Extra bold</option><option value="800">Black</option></select></label></div>
+            <div class="text-style-group"><strong>Color and outline</strong><label class="text-color-control">Text color<input type="color" data-text-property="color"></label><label class="text-check"><input type="checkbox" data-text-property="gradientEnabled"> Gradient</label><label class="text-color-control">Second color<input type="color" data-text-property="gradientColor"></label><div class="text-control-pair"><label class="text-color-control">Outline<input type="color" data-text-property="outlineColor"></label><label class="text-control">Width<input type="number" min="0" max="30" step="1" data-text-property="outlineWidth"></label></div></div>
+            <div class="text-style-group"><strong>Shadow and glow</strong><div class="text-control-pair"><label class="text-color-control">Shadow color<input type="color" data-text-property="shadowColor"></label><label class="text-control">Shadow blur<input type="number" min="0" max="40" step="1" data-text-property="shadowBlur"></label></div><div class="text-control-pair"><label class="text-color-control">Glow color<input type="color" data-text-property="glowColor"></label><label class="text-control">Glow blur<input type="number" min="0" max="40" step="1" data-text-property="glowBlur"></label></div></div>
+            <div class="text-style-group"><strong>Layout</strong><label class="text-control">Opacity <span data-text-output="opacity">100%</span><input type="range" min="0" max="100" step="1" data-text-property="opacity"></label><div class="text-control-pair"><label class="text-control">Letter spacing<input type="number" min="-5" max="30" step="0.5" data-text-property="letterSpacing"></label><label class="text-control">Line spacing<input type="number" min="0.7" max="2.5" step="0.1" data-text-property="lineSpacing"></label></div><label class="text-control">Alignment<select data-text-property="alignment"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></label><label class="text-check"><input type="checkbox" data-text-property="backgroundEnabled"> Text background</label><div class="text-control-pair"><label class="text-color-control">Background color<input type="color" data-text-property="backgroundColor"></label><label class="text-control">Background opacity<input type="number" min="0" max="100" step="5" data-text-property="backgroundOpacity"></label></div><label class="text-control">Rotation <span data-text-output="rotation">0&deg;</span><input type="range" min="-180" max="180" step="1" data-text-property="rotation"></label><div class="text-control-pair"><label class="text-control">Position X (%)<input type="number" min="0" max="100" step="1" data-text-property="positionX"></label><label class="text-control">Position Y (%)<input type="number" min="0" max="100" step="1" data-text-property="positionY"></label></div></div>
+            <label class="text-control">Animation speed <span data-text-output="animationDuration">0.6s</span><input type="range" min="0.1" max="3" step="0.1" data-text-property="animationDuration"></label>
+            <div class="motion-effect-section"><strong>Text Animation</strong><div id="textMotionEffects" class="motion-effect-groups"></div></div>
+          </section>
+          <section class="media-motion-panel" id="mediaMotionPanel" hidden><div class="text-inspector-heading"><span class="eyebrow">ANIMATION</span><strong>Image Animation / Motion Effects</strong></div><p>Choose a motion preset to preview it on the selected media.</p><div id="mediaMotionEffects" class="motion-effect-groups"></div></section>
+          <div class="panel" id="adjustPanel">
+            <section class="control-section"><div class="section-title"><span>Light</span><button class="section-reset" data-reset="light">Reset</button></div>
+              <label class="slider-row"><span>Exposure</span><output id="exposureValue">0</output><input type="range" data-key="exposure" min="-100" max="100" value="0"></label>
+              <label class="slider-row"><span>Contrast</span><output id="contrastValue">0</output><input type="range" data-key="contrast" min="-100" max="100" value="0"></label>
+              <label class="slider-row"><span>Highlights</span><output id="highlightsValue">0</output><input type="range" data-key="highlights" min="-100" max="100" value="0"></label>
+              <label class="slider-row"><span>Shadows</span><output id="shadowsValue">0</output><input type="range" data-key="shadows" min="-100" max="100" value="0"></label>
+            </section>
+            <section class="control-section"><div class="section-title"><span>Color</span><button class="section-reset" data-reset="color">Reset</button></div>
+              <label class="slider-row"><span>Temperature</span><output id="temperatureValue">0</output><input type="range" data-key="temperature" min="-100" max="100" value="0"></label>
+              <label class="slider-row"><span>Tint</span><output id="tintValue">0</output><input type="range" data-key="tint" min="-100" max="100" value="0"></label>
+              <label class="slider-row"><span>Saturation</span><output id="saturationValue">0</output><input type="range" data-key="saturation" min="-100" max="100" value="0"></label>
+            </section>
+            <section class="control-section detail-section"><div class="section-title"><span>Detail</span><button class="section-reset" data-reset="detail">Reset</button></div><label class="slider-row"><span>Grain</span><output id="grainValue">0</output><input type="range" data-key="grain" min="0" max="100" value="0"></label></section>
+            <div class="inspector-foot"><span>&#10022;</span> Fine-tune every detail</div>
+          </div>
+          <div class="panel preset-panel" id="presetsPanel" hidden><p class="preset-intro">A good place to start. Make each one your own.</p><div class="preset-grid" id="presetGrid"></div></div>
+        </aside>
+      </section>
     </main>
-
-</body>
-
+  </div>
+  <input type="file" id="fileInput" accept="image/*,video/*,audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" multiple hidden>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js" defer></script>
+<dialog class="effect-library music-library-dialog" id="musicLibrary"><div class="effect-library-head"><div><small>NEURA AUDIO</small><h2>Add music</h2></div><button id="closeMusicLibrary" type="button" aria-label="Close music library">&#215;</button></div><div class="music-library-toolbar"><div><strong>Your music</strong><small>Saved in this browser</small></div><button class="button music-source-action" id="chooseLocalMusic" type="button">+ Upload music</button></div><div id="musicLibraryTracks" class="music-library-tracks"></div><p class="effect-library-foot">Choose a saved track to preview or add it to the timeline.</p></dialog><dialog class="effect-library browse-music-dialog" id="browseMusicDialog"><div class="effect-library-head"><div><small>ROYALTY-FREE SOURCES</small><h2>Browse music</h2></div><button id="closeBrowseMusic" type="button" aria-label="Close music sources">&#215;</button></div><div class="browse-music-body"><p>Download a track from a music source, then choose <strong>+ Upload music</strong> to save it in Neura.</p><div class="browse-music-links"><a href="https://pixabay.com/music/search/trending/" target="_blank" rel="noopener noreferrer"><strong>Trending music</strong><small>Browse trending tracks on Pixabay</small><span>Open source &#8599;</span></a><a href="https://pixabay.com/music/" target="_blank" rel="noopener noreferrer"><strong>Pixabay Music</strong><small>Search by genre, mood, or theme</small><span>Open source &#8599;</span></a><a href="https://mixkit.co/free-stock-music/genre/" target="_blank" rel="noopener noreferrer"><strong>Mixkit Music</strong><small>Browse free stock music by genre</small><span>Open source &#8599;</span></a></div></div><p class="effect-library-foot">Track licenses vary. Check each source's terms before publishing.</p></dialog><dialog class="effect-library" id="effectLibrary"><div class="effect-library-head"><div><small>NEURA EFFECTS</small><h2>Effects</h2></div><button id="closeEffects" type="button" aria-label="Close effects">×</button></div><div class="effect-library-body"><nav class="effect-categories"><button class="active" data-effect-category="All">All effects</button><button data-effect-category="Trending">Trending</button><button data-effect-category="Classic">Classic</button><button data-effect-category="Magic cutout">Magic cutout</button><button data-effect-category="Body effects">Body effects</button></nav><section class="effect-card-grid"><button class="effect-card" data-effect="shadowLines"><span class="effect-art shadow-art"></span><strong>Shadow Lines</strong><small>Trending · Video</small></button><button class="effect-card" data-effect="vrGameFire"><span class="effect-art fire-art"></span><strong>VR Game Fire</strong><small>Trending · Video</small></button><button class="effect-card" data-effect="slantedOpen"><span class="effect-art slant-art"></span><strong>Slanted Open</strong><small>Classic · Video</small></button><button class="effect-card" data-effect="tremorScan"><span class="effect-art tremor-art"></span><strong>Tremor Scan</strong><small>Body effects</small></button></section></div><p class="effect-library-foot">Choose an effect to add it at the playhead.</p></dialog></body>
 </html>

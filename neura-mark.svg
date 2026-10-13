@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" fill="none">
+  <defs>
+    <linearGradient id="ribbon" x1="17" y1="4" x2="93" y2="90" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF0B5"/>
+      <stop offset=".28" stop-color="#19D7FF"/>
+      <stop offset=".56" stop-color="#0875FF"/>
+      <stop offset="1" stop-color="#0037C8"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="83" y1="18" x2="104" y2="73" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#25E7FF"/>
+      <stop offset="1" stop-color="#0754E9"/>
+    </linearGradient>
+    <linearGradient id="bar2" x1="64" y1="29" x2="79" y2="61" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#28DDFB"/>
+      <stop offset="1" stop-color="#0753D9"/>
+    </linearGradient>
+  </defs>
+  <path d="M19 90c-8 0-14-6-14-14V24C5 8 20-1 34 6c3 1 6 4 10 7l57 53v10c0 8-6 14-14 14H77L24 40v36c0 8-2 14-5 14Z" fill="url(#ribbon)"/>
+  <path d="M76 22c0-2 1-4 3-5l17-11c2-1 4 0 4 3v47L76 34V22Z" fill="url(#bar)"/>
+  <path d="M57 31c0-2 1-4 3-5l14-9v36L57 39v-8Z" fill="url(#bar2)"/>
+</svg>
