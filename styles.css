@@ -1048,3 +1048,431 @@ body {
 #addSelectedMediaToTimeline{height:25px;padding:0 8px;border:1px solid #a6ce58;border-radius:4px;background:#c6f36b;color:#171910;font:600 9px 'DM Sans';white-space:nowrap;cursor:pointer}
 #addSelectedMediaToTimeline:disabled{opacity:.45;cursor:default}
 @media(max-width:700px){.media-selection-info{grid-template-columns:34px minmax(60px,1fr) auto}.media-selection-info #imageDurationControl{grid-column:2}.media-selection-info #addSelectedMediaToTimeline{grid-column:3;grid-row:1/3}.media-clip-fields{flex-wrap:wrap}}
+
+/* Mobile editor layout */
+@media (max-width: 850px) {
+    body {
+        min-width: 0;
+        min-height: 100%;
+        overflow-x: hidden;
+    }
+
+    .app-shell {
+        display: block;
+        min-height: 100dvh;
+    }
+
+    .sidebar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 9px 12px;
+        width: 100%;
+        padding: 10px 12px 8px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+        height: 36px;
+        gap: 8px;
+        margin: 0;
+        padding: 0 2px;
+    }
+
+    .brand-mark,
+    .brand-mark img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .brand-copy strong {
+        font-size: 16px;
+    }
+
+    .new-project {
+        width: auto;
+        min-width: 105px;
+        height: 36px;
+        padding: 0 9px;
+        font-size: 11px;
+    }
+
+    .new-project kbd,
+    .nav-label,
+    .sidebar-bottom {
+        display: none;
+    }
+
+    .main-nav {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 5px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .main-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-item {
+        flex: 1 0 auto;
+        justify-content: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 9px;
+    }
+
+    .nav-icon {
+        width: auto;
+    }
+
+    .nav-count {
+        display: none;
+    }
+
+    .main-area {
+        width: 100%;
+    }
+
+    .topbar {
+        height: auto;
+        min-height: 56px;
+        flex-wrap: wrap;
+        gap: 9px;
+        padding: 10px 13px;
+    }
+
+    .breadcrumbs {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .breadcrumbs strong {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .top-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .saved-status {
+        margin-right: auto;
+        white-space: nowrap;
+    }
+
+    .editor-layout {
+        height: auto;
+        min-height: 0;
+        flex-direction: column;
+    }
+
+    .canvas-column {
+        width: 100%;
+        padding: 0 12px;
+    }
+
+    .canvas-toolbar {
+        height: 45px;
+        gap: 8px;
+    }
+
+    .tool-group {
+        gap: 2px;
+    }
+
+    .canvas-meta {
+        gap: 6px;
+        font-size: 9px;
+        white-space: nowrap;
+    }
+
+    .canvas-stage {
+        flex: none;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+        aspect-ratio: 16 / 9;
+    }
+
+    .canvas-stage > img:not(.timeline-media-preview),
+    .canvas-stage > video:not(.timeline-media-preview) {
+        max-width: calc(100% - 24px);
+        max-height: calc(100% - 24px);
+    }
+
+    .empty-state {
+        max-width: 90%;
+    }
+
+    .empty-state h1 {
+        font-size: clamp(17px, 5vw, 23px);
+    }
+
+    .empty-state p {
+        max-width: 300px;
+        font-size: 10px;
+    }
+
+    .text-timeline {
+        width: 100%;
+        margin: 10px 0 12px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: thin;
+        scrollbar-color: #45473e #171814;
+    }
+
+    .timeline-heading {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 8px;
+        letter-spacing: .8px;
+    }
+
+    .timeline-actions {
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .timeline-actions button,
+    .music-label button {
+        min-height: 28px;
+    }
+
+    .timeline-ruler,
+    .timeline-tracks {
+        min-width: 620px;
+    }
+
+    .filmstrip {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        padding: 12px 0 16px;
+    }
+
+    .media-library {
+        max-height: 150px;
+    }
+
+    .inspector {
+        width: 100%;
+        flex: none;
+        border-top: 1px solid var(--line);
+        border-left: 0;
+        padding: 18px 13px 26px;
+        overflow: visible;
+    }
+
+    .inspector-tabs {
+        gap: 18px;
+        overflow-x: auto;
+    }
+
+    .text-inspector,
+    .media-motion-panel {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .effect-library {
+        max-height: 90dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .effect-library-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .effect-categories {
+        display: flex;
+        gap: 5px;
+        overflow-x: auto;
+        padding: 10px 12px;
+        border-right: 0;
+        border-bottom: 1px solid #30312b;
+        scrollbar-width: thin;
+    }
+
+    .effect-categories button {
+        flex: 0 0 auto;
+    }
+
+    .effect-card-grid {
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .effect-card {
+        grid-template-rows: 82px auto auto;
+    }
+
+    .effect-library-head {
+        padding: 14px;
+    }
+
+    .effect-library-foot {
+        padding: 10px 14px;
+    }
+}
+
+@media (max-width: 420px) {
+    .sidebar {
+        gap: 8px 7px;
+        padding-inline: 9px;
+    }
+
+    .new-project {
+        min-width: 96px;
+        font-size: 10px;
+    }
+
+    .nav-item {
+        padding: 0 7px;
+        font-size: 11px;
+    }
+
+    .topbar {
+        padding-inline: 10px;
+    }
+
+    .saved-status {
+        display: none;
+    }
+
+    .top-actions {
+        justify-content: space-between;
+    }
+
+    .canvas-column {
+        padding-inline: 9px;
+    }
+
+    .canvas-toolbar {
+        height: auto;
+        min-height: 43px;
+        flex-wrap: wrap;
+        padding: 5px 0;
+    }
+
+    .tool-button {
+        width: 26px;
+    }
+
+    .canvas-meta {
+        font-size: 8px;
+    }
+
+    .text-timeline {
+        padding-inline: 9px;
+    }
+
+    .timeline-ruler,
+    .timeline-tracks {
+        min-width: 560px;
+    }
+
+    .effect-card-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .effect-card {
+        grid-template-rows: 100px auto auto;
+    }
+
+    .music-track-card {
+        grid-template-columns: 42px minmax(65px, 1fr) 32px 45px;
+        gap: 6px;
+        padding: 6px;
+    }
+
+    .music-track-cover {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+/* Keep complete media frames visible in the preview and library. */
+.canvas-stage > #photo,
+.canvas-stage > #videoPreview {
+    width: auto;
+    height: auto;
+    max-width: calc(100% - 32px);
+    max-height: calc(100% - 32px);
+    object-fit: contain;
+}
+
+.canvas-stage > .timeline-media-preview {
+    object-fit: contain;
+}
+
+.media-library-thumb img,
+.media-item img,
+#selectedMediaPreview {
+    object-fit: contain;
+    background-color: #10110f;
+}
+
+.media-resize-overlay {
+    position: absolute;
+    z-index: 7;
+    border: 1px solid #c6f36b;
+    pointer-events: none;
+}
+
+.media-resize-overlay[hidden] {
+    display: none;
+}
+
+.media-resize-value {
+    position: absolute;
+    top: -23px;
+    left: -1px;
+    padding: 3px 6px;
+    border: 1px solid #485631;
+    border-radius: 4px;
+    background: #171a13ed;
+    color: #d9f79a;
+    font: 9px 'DM Sans';
+    white-space: nowrap;
+}
+
+.media-resize-handle {
+    position: absolute;
+    left: 100%;
+    top: 100%;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 2px solid #171a13;
+    border-radius: 50%;
+    background: #c6f36b;
+    box-shadow: 0 0 0 1px #c6f36b, 0 2px 6px #0009;
+    pointer-events: auto;
+    touch-action: none;
+    transform: translate(-50%, -50%);
+    cursor: nwse-resize;
+}
+
+.media-resize-handle:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+@media (max-width: 850px) {
+    .media-resize-handle {
+        width: 25px;
+        height: 25px;
+    }
+}

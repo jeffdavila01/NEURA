@@ -93,6 +93,9 @@ const timelineClipVideo = $('#timelineClipVideo');
 const timelineClipImage = $('#timelineClipImage');
 const musicPreview = $('#musicPreview');
 const stage = $('#dropZone');
+const mediaResizeOverlay = $('#mediaResizeOverlay');
+const mediaResizeHandle = $('#mediaResizeHandle');
+const mediaResizeValue = $('#mediaResizeValue');
 const filters = $$('.slider-row input');
 
 function buildMotionEffectGroups(container, target) {
@@ -190,7 +193,7 @@ function restoreHistorySnapshot(snapshot) {
   videoPreview.muted = muteOriginalAudio;
   $('#muteOriginalAudio').checked = muteOriginalAudio;
   effectClips = (snapshot.effectClips || []).map(item => ({ ...item }));
-  timelineMediaClips = (snapshot.timelineMediaClips || []).map(item => ({ ...item }));
+  timelineMediaClips = (snapshot.timelineMediaClips || []).map(item => ({ ...item, scale: clampMediaScale(item.scale) }));
   selectedTimelineMediaId = snapshot.selectedTimelineMediaId ?? null;
   selectedEffectClipId = snapshot.selectedEffectClipId ?? null;
   timelineLanes = normalizeTimelineLanes(snapshot.timelineLanes);
@@ -400,7 +403,7 @@ function addMediaAssetToTimeline(assetId, trackId = null, start = null) {
   const clip = {
     id: `media-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     assetId: asset.id, start: Math.max(0, at), end: Math.max(0, at) + clipDuration,
-    sourceOffset: 0, trackId: lane.id, isPrimary: false,
+    sourceOffset: 0, trackId: lane.id, isPrimary: false, scale: 1,
     autoDuration: asset.kind === 'video' && !asset.duration
   };
   timelineMediaClips.push(clip); selectedTimelineMediaId = clip.id;
@@ -550,9 +553,12 @@ function loadFile(file, reset = true) {
   }
   originalUrl = URL.createObjectURL(file);
   const primaryAsset = registerMediaAsset(file);
-  if (!timelineMediaClips.some(clip => clip.assetId === primaryAsset.id)) {
-    timelineMediaClips.push({ id: `media-primary-${Date.now()}`, assetId: primaryAsset.id, start: 0, end: primaryAsset.duration || (isVideo ? 0 : defaultImageClipDuration), sourceOffset: 0, trackId: mediaTrackId, isPrimary: true, autoDuration: isVideo });
+  let primaryClip = timelineMediaClips.find(clip => clip.assetId === primaryAsset.id && clip.isPrimary);
+  if (!primaryClip) {
+    primaryClip = { id: `media-primary-${Date.now()}`, assetId: primaryAsset.id, start: 0, end: primaryAsset.duration || (isVideo ? 0 : defaultImageClipDuration), sourceOffset: 0, trackId: mediaTrackId, isPrimary: true, autoDuration: isVideo, scale: 1 };
+    timelineMediaClips.push(primaryClip);
   }
+  if (!selectedTimelineMediaId || reset) selectedTimelineMediaId = primaryClip.id;
   if (isVideo) {
     photo.removeAttribute('src'); photo.hidden = true;
     videoPreview.src = originalUrl; videoPreview.hidden = false;
@@ -1212,11 +1218,11 @@ async function restoreWorkspace() {
       asset.waveform = saved.waveform || asset.waveform;
       asset.width = saved.width || asset.width; asset.height = saved.height || asset.height;
     });
-    timelineMediaClips = (record.timelineMediaClips || []).map(clip => ({ ...clip }));
+    timelineMediaClips = (record.timelineMediaClips || []).map(clip => ({ ...clip, scale: clampMediaScale(clip.scale) }));
     selectedTimelineMediaId = record.selectedTimelineMediaId ?? null;
     if (!timelineMediaClips.length && originalFile) {
       const primary = mediaAssets.find(asset => asset.name === originalFile.name && asset.type === originalFile.type);
-      if (primary) timelineMediaClips = [{ id: `media-primary-${Date.now()}`, assetId: primary.id, start: 0, end: primary.duration || (isVideo ? 0 : defaultImageClipDuration), sourceOffset: 0, trackId: mediaTrackId, isPrimary: true, autoDuration: isVideo }];
+      if (primary) timelineMediaClips = [{ id: `media-primary-${Date.now()}`, assetId: primary.id, start: 0, end: primary.duration || (isVideo ? 0 : defaultImageClipDuration), sourceOffset: 0, trackId: mediaTrackId, isPrimary: true, autoDuration: isVideo, scale: 1 }];
     }
     const savedMusic = record.musicTracks?.length ? record.musicTracks : (record.music ? [{ file: record.music, name: record.musicName || 'music', type: record.music.type || 'audio/mpeg', start: record.musicStart, end: record.musicEnd, offset: record.musicOffset }] : []);
     savedMusic.forEach(track => loadMusic(new File([track.file], track.name || 'music', { type: track.type || track.file.type || 'audio/mpeg', lastModified: track.file.lastModified || Date.now() }), track.start, track.end ?? null, track.offset || 0, track.id, track.trackId, track.assetId, track.waveform));
@@ -1331,9 +1337,11 @@ function applyMediaMotionPreview() {
   const range = currentTransitionRange();
   const transition = getVideoTransitionState(videoPreview.currentTime, range.start, range.end);
   const motion = getMediaMotionState();
+  const activeClip = timelineMediaClips.find(clip => clip.id === activeTimelinePreviewClipId) || getActiveTimelineMediaClip(timelineCursorTime);
   const reveal = Math.min(transition.reveal, motion.reveal);
   videoPreview.style.opacity = String(transition.opacity * motion.opacity);
-  videoPreview.style.transform = `translate(${motion.x * 100}%, ${motion.y * 100}%) scale(${motion.scale * transition.scale}) rotate(${motion.rotation}deg)`;
+  videoPreview.style.transformOrigin = 'center center';
+  videoPreview.style.transform = `translate(${motion.x * 100}%, ${motion.y * 100}%) scale(${motion.scale * transition.scale * getTimelineMediaScale(activeClip)}) rotate(${motion.rotation}deg)`;
   videoPreview.style.filter = [currentVideoFilter(), motion.blur + transition.blur ? `blur(${motion.blur + transition.blur}px)` : ''].filter(value => value && value !== 'none').join(' ') || 'none';
   videoPreview.style.clipPath = reveal < 1 ? `inset(0 0 ${(1 - reveal) * 100}% 0)` : 'none';
 }
@@ -1640,7 +1648,7 @@ function renderTimelineMediaClip(clipItem, row, duration, tracks) {
   clip.addEventListener('pointerdown', event => {
     if (timelineLocks.has(clipItem.trackId)) return;
     event.preventDefault(); event.stopPropagation();
-    selectedTimelineMediaId = clipItem.id; selectedMusicClipId = null; selectedEffectClipId = null; syncEffectProperties(); syncMediaClipProperties(); clip.classList.add('selected');
+    selectedTimelineMediaId = clipItem.id; selectedMusicClipId = null; selectedEffectClipId = null; syncEffectProperties(); syncMediaClipProperties(); clip.classList.add('selected'); updateMediaResizeOverlay();
     const originX = event.clientX, initialStart = clipItem.start, initialEnd = clipItem.end, initialOffset = clipItem.sourceOffset || 0;
     const mode = event.target === startHandle ? 'start' : event.target === endHandle ? 'end' : 'move';
     if (mode === 'move') clip.style.pointerEvents = 'none';
@@ -2109,6 +2117,7 @@ videoPreview.addEventListener('play', () => {
     $('#timelinePlayButton').textContent = '❚❚'; $('#timelinePlayButton').setAttribute('aria-label', 'Pause timeline');
     if (!playheadAnimationFrame) playheadAnimationFrame = requestAnimationFrame(animateTimelinePlayhead);
   }
+  updateMediaResizeOverlay();
   syncMusicPlayback();
   if (musicClips.length) ensureMusicAudioGraph().then(syncMusicPlayback).catch(() => {});
 });
@@ -2139,6 +2148,7 @@ function startTimelinePlayback() {
   if (!duration) return;
   if (timelineCursorTime >= duration) timelineCursorTime = 0;
   timelinePlaying = true; timelineLastFrameTime = performance.now();
+  updateMediaResizeOverlay();
   $('#timelinePlayButton').textContent = '❚❚'; $('#timelinePlayButton').setAttribute('aria-label', 'Pause timeline');
   renderTimelinePreviewAt(timelineCursorTime); updateTextVisibility(); syncMusicPlayback();
   if (musicClips.length) ensureMusicAudioGraph().then(syncMusicPlayback).catch(() => {});
@@ -2154,6 +2164,7 @@ function pauseTimelinePlayback() {
   musicClips.forEach(clip => clip.audio.pause());
   $('#timelinePlayButton').textContent = '▶'; $('#timelinePlayButton').setAttribute('aria-label', 'Play timeline');
   updateTimelinePlayhead();
+  updateMediaResizeOverlay();
 }
 
 function getActiveTimelineMediaClip(time) {
@@ -2162,6 +2173,118 @@ function getActiveTimelineMediaClip(time) {
     .sort((a, b) => timelineLanes.findIndex(lane => lane.id === a.trackId) - timelineLanes.findIndex(lane => lane.id === b.trackId) || a.start - b.start)
     .at(-1) || null;
 }
+
+function clampMediaScale(value) {
+  return Math.max(.12, Math.min(3, Number(value) || 1));
+}
+
+function getTimelineMediaScale(clip) {
+  return clampMediaScale(clip?.scale);
+}
+
+function applyTimelineMediaPreviewScale(clip, element) {
+  if (!clip || !element) return;
+  if (element === photo) applyPhotoTransform(getTimelineMediaScale(clip));
+  else if (element === videoPreview) applyMediaMotionPreview();
+  else {
+    element.style.transformOrigin = 'center center';
+    element.style.transform = `scale(${getTimelineMediaScale(clip)})`;
+  }
+}
+
+function updateMediaResizeOverlay() {
+  if (!mediaResizeOverlay) return;
+  const clip = getActiveTimelineMediaClip(timelineCursorTime);
+  const element = clip ? getTimelinePreviewElement(timelineCursorTime) : null;
+  const unavailable = !clip || clip.id !== selectedTimelineMediaId || !element || element.hidden || timelinePlaying || timelineGuidePreviewActive || textToolActive || !$('#cropToolbar').hidden;
+  if (unavailable) {
+    mediaResizeOverlay.hidden = true;
+    mediaResizeOverlay.setAttribute('aria-hidden', 'true');
+    return;
+  }
+  const stageRect = stage.getBoundingClientRect();
+  const mediaRect = element.getBoundingClientRect();
+  if (!mediaRect.width || !mediaRect.height) {
+    mediaResizeOverlay.hidden = true;
+    mediaResizeOverlay.setAttribute('aria-hidden', 'true');
+    return;
+  }
+  mediaResizeOverlay.style.left = `${mediaRect.left - stageRect.left}px`;
+  mediaResizeOverlay.style.top = `${mediaRect.top - stageRect.top}px`;
+  mediaResizeOverlay.style.width = `${mediaRect.width}px`;
+  mediaResizeOverlay.style.height = `${mediaRect.height}px`;
+  const visibleHandleX = Math.max(12, Math.min(mediaRect.width - 12, stageRect.right - mediaRect.left - 12));
+  const visibleHandleY = Math.max(12, Math.min(mediaRect.height - 12, stageRect.bottom - mediaRect.top - 12));
+  mediaResizeHandle.style.left = `${visibleHandleX}px`;
+  mediaResizeHandle.style.top = `${visibleHandleY}px`;
+  mediaResizeValue.textContent = `${Math.round(getTimelineMediaScale(clip) * 100)}%`;
+  mediaResizeOverlay.hidden = false;
+  mediaResizeOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function setTimelineMediaScale(clip, scale) {
+  if (!clip) return;
+  clip.scale = clampMediaScale(scale);
+  if (clip.id === activeTimelinePreviewClipId) {
+    applyTimelineMediaPreviewScale(clip, getTimelinePreviewElement(timelineCursorTime));
+    applyAnimatedTextPositions(timelineCursorTime);
+  }
+  updateMediaResizeOverlay();
+}
+
+window.addEventListener('resize', updateMediaResizeOverlay);
+
+mediaResizeHandle.addEventListener('pointerdown', event => {
+  const clip = getActiveTimelineMediaClip(timelineCursorTime);
+  if (!clip || clip.id !== selectedTimelineMediaId) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const rect = mediaResizeOverlay.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const startDistance = Math.max(1, Math.hypot(event.clientX - centerX, event.clientY - centerY));
+  const startingScale = getTimelineMediaScale(clip);
+  mediaResizeHandle.setPointerCapture?.(event.pointerId);
+  const move = moveEvent => {
+    const distance = Math.hypot(moveEvent.clientX - centerX, moveEvent.clientY - centerY);
+    setTimelineMediaScale(clip, startingScale * distance / startDistance);
+  };
+  const finish = () => {
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', finish);
+    window.removeEventListener('pointercancel', finish);
+    scheduleSave();
+    queueHistory();
+  };
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', finish, { once: true });
+  window.addEventListener('pointercancel', finish, { once: true });
+});
+
+mediaResizeHandle.addEventListener('dblclick', event => {
+  event.preventDefault();
+  const clip = getActiveTimelineMediaClip(timelineCursorTime);
+  if (!clip || clip.id !== selectedTimelineMediaId) return;
+  setTimelineMediaScale(clip, 1);
+  scheduleSave();
+  queueHistory();
+});
+
+mediaResizeHandle.addEventListener('keydown', event => {
+  const clip = getActiveTimelineMediaClip(timelineCursorTime);
+  if (!clip || clip.id !== selectedTimelineMediaId) return;
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    setTimelineMediaScale(clip, 1);
+  } else if (['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'].includes(event.key)) {
+    event.preventDefault();
+    const step = event.shiftKey ? .1 : .05;
+    const direction = event.key === 'ArrowUp' || event.key === 'ArrowRight' ? 1 : -1;
+    setTimelineMediaScale(clip, getTimelineMediaScale(clip) + step * direction);
+  } else return;
+  scheduleSave();
+  queueHistory();
+});
 
 function renderTimelinePreviewAt(time, guidePreview = false) {
   timelineGuidePreviewActive = Boolean(guidePreview && !timelinePlaying);
@@ -2175,6 +2298,7 @@ function renderTimelinePreviewAt(time, guidePreview = false) {
   if (!clip || !asset) {
     photo.hidden = true; videoPreview.hidden = true; timelineClipImage.hidden = true; secondaryVideo.hidden = true;
     pausePreviewElement(videoPreview); pausePreviewElement(secondaryVideo); activeTimelinePreviewClipId = null;
+    updateMediaResizeOverlay();
     updateTextVisibility(time); return;
   }
   const sourceTime = Math.max(0, (clip.sourceOffset || 0) + time - clip.start);
@@ -2213,8 +2337,11 @@ function renderTimelinePreviewAt(time, guidePreview = false) {
     else if (!timelinePlaying) pausePreviewElement(secondaryVideo);
   }
   activeTimelinePreviewClipId = clip.id;
+  const previewElement = primaryVideo ? videoPreview : primaryImage ? photo : asset.kind === 'image' ? timelineClipImage : secondaryVideo;
+  applyTimelineMediaPreviewScale(clip, previewElement);
   if (!isGuidePreview) updateTimelinePlayhead();
   updateTextVisibility(time);
+  updateMediaResizeOverlay();
 }
 
 function updateTimelinePlayhead() {
@@ -2500,6 +2627,7 @@ $('#textToolButton').addEventListener('click', () => {
   textToolActive = !textToolActive;
   $('#textToolButton').classList.toggle('selected', textToolActive);
   $('#dropZone').classList.toggle('text-mode', textToolActive);
+  updateMediaResizeOverlay();
   if (textToolActive) showToast('Click on the photo or video to place text.');
 });
 
@@ -2507,6 +2635,16 @@ stage.addEventListener('click', event => {
   if (![photo, videoPreview, timelineClipImage, timelineClipVideo].includes(event.target)) return;
   if (!textToolActive) {
     if (selectedTextId !== null) { selectedTextId = null; syncTextTimingPanel(); }
+    const clip = getActiveTimelineMediaClip(timelineGuidePreviewActive ? timelineGuideTime : timelineCursorTime);
+    if (clip) {
+      selectedTimelineMediaId = clip.id;
+      selectedMusicClipId = null;
+      selectedEffectClipId = null;
+      syncMediaClipProperties();
+      renderTextTimeline();
+      updateMediaResizeOverlay();
+      scheduleSave();
+    }
     return;
   }
   const mediaRect = event.target.getBoundingClientRect();
@@ -2522,6 +2660,7 @@ stage.addEventListener('click', event => {
   renderTextItems();
   const inputs = $$('#textLayer textarea');
   inputs[inputs.length - 1].focus();
+  updateMediaResizeOverlay();
   scheduleSave(); queueHistory();
 });
 
@@ -2809,6 +2948,11 @@ $('#flipImage').addEventListener('click', () => {
   applyCropPreview();
 });
 
+function applyPhotoTransform(mediaScale = getTimelineMediaScale(timelineMediaClips.find(clip => clip.id === activeTimelinePreviewClipId && clip.isPrimary) || timelineMediaClips.find(clip => clip.isPrimary))) {
+  photo.style.transformOrigin = 'center center';
+  photo.style.transform = `rotate(${rotation}deg) scaleX(${flipped ? -1 : 1}) scale(${1 / Math.min(crop.width, crop.height) * mediaScale})`;
+}
+
 function applyCropPreview() {
   if (crop.width === 1 && crop.height === 1) {
     photo.style.clipPath = '';
@@ -2819,8 +2963,9 @@ function applyCropPreview() {
     const left = crop.x * 100;
     photo.style.clipPath = `inset(${top}% ${right}% ${bottom}% ${left}%)`;
   }
-  photo.style.transform = `rotate(${rotation}deg) scaleX(${flipped ? -1 : 1}) scale(${1 / Math.min(crop.width, crop.height)})`;
+  applyPhotoTransform();
   renderTextItems();
+  updateMediaResizeOverlay();
   scheduleSave();
   queueHistory();
 }
@@ -2843,6 +2988,7 @@ function selectCropRatio(ratio) {
 $('#cropButton').addEventListener('click', () => {
   if (!originalUrl || isVideo) return showToast('Choose a photo before cropping.');
   $('#cropToolbar').hidden = !$('#cropToolbar').hidden;
+  updateMediaResizeOverlay();
 });
 $$('.crop-toolbar [data-ratio]').forEach(button => button.addEventListener('click', () => {
   const parts = button.dataset.ratio.split('/').map(Number);
@@ -2850,7 +2996,7 @@ $$('.crop-toolbar [data-ratio]').forEach(button => button.addEventListener('clic
   selectCropRatio(ratio);
   $$('.crop-toolbar [data-ratio]').forEach(item => item.classList.toggle('active', item === button));
 }));
-$('#cropDone').addEventListener('click', () => { $('#cropToolbar').hidden = true; showToast('Crop applied.'); });
+$('#cropDone').addEventListener('click', () => { $('#cropToolbar').hidden = true; updateMediaResizeOverlay(); showToast('Crop applied.'); });
 
 ['dragenter', 'dragover'].forEach(type => stage.addEventListener(type, event => { event.preventDefault(); stage.classList.add('dragging'); }));
 ['dragleave', 'drop'].forEach(type => stage.addEventListener(type, event => { event.preventDefault(); stage.classList.remove('dragging'); }));
@@ -2958,6 +3104,8 @@ $('#exportButton').addEventListener('click', async () => {
   }
   await ensureTextFontsReady();
   const canvas = document.createElement('canvas');
+  const imageClip = timelineMediaClips.find(clip => clip.id === activeTimelinePreviewClipId && clip.isPrimary) || timelineMediaClips.find(clip => clip.isPrimary);
+  const imageScale = getTimelineMediaScale(imageClip);
   const sourceX = Math.round(crop.x * photo.naturalWidth);
   const sourceY = Math.round(crop.y * photo.naturalHeight);
   const sourceWidth = Math.round(crop.width * photo.naturalWidth);
@@ -2966,11 +3114,14 @@ $('#exportButton').addEventListener('click', async () => {
   canvas.width = sideways ? sourceHeight : sourceWidth;
   canvas.height = sideways ? sourceWidth : sourceHeight;
   const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   const exposure = Math.pow(2, values.exposure / 100);
   ctx.filter = `brightness(${exposure}) contrast(${1 + values.contrast / 100}) saturate(${Math.max(0,1 + values.saturation / 100)}) sepia(${Math.max(0,values.temperature) / 300}) hue-rotate(${values.tint * .25}deg)`;
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate(rotation * Math.PI / 180);
   ctx.scale(flipped ? -1 : 1, 1);
+  ctx.scale(imageScale, imageScale);
   ctx.drawImage(photo, sourceX, sourceY, sourceWidth, sourceHeight, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   try {
@@ -3033,6 +3184,8 @@ $('#trimExport').addEventListener('click', async () => {
   status.textContent = 'Preparing clip…';
   recorderFailed = false;
   try {
+    const exportScaleClip = timelineMediaClips.find(clip => clip.id === selectedTimelineMediaId && clip.isPrimary) || timelineMediaClips.find(clip => clip.isPrimary && timelineCursorTime >= clip.start && timelineCursorTime < clip.end) || timelineMediaClips.find(clip => clip.isPrimary);
+    const exportMediaScale = getTimelineMediaScale(exportScaleClip);
     await ensureTextFontsReady();
     const musicDestination = musicClips.length ? await ensureMusicAudioGraph() : null;
     if (Math.abs(videoPreview.currentTime - start) > .05) {
@@ -3078,7 +3231,7 @@ $('#trimExport').addEventListener('click', async () => {
       renderContext.filter = [currentVideoFilter(), motion.blur + transition.blur ? `blur(${motion.blur + transition.blur}px)` : ''].filter(value => value && value !== 'none').join(' ') || 'none';
       renderContext.translate(renderCanvas.width / 2 + motion.x * renderCanvas.width, renderCanvas.height / 2 + motion.y * renderCanvas.height);
       renderContext.rotate(motion.rotation * Math.PI / 180);
-      renderContext.scale(motion.scale * transition.scale, motion.scale * transition.scale);
+      renderContext.scale(motion.scale * transition.scale * exportMediaScale, motion.scale * transition.scale * exportMediaScale);
       if (reveal < 1) {
         renderContext.beginPath();
         renderContext.rect(-renderCanvas.width / 2, -renderCanvas.height / 2, renderCanvas.width, renderCanvas.height * reveal);
