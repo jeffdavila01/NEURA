@@ -1,0 +1,9 @@
+{
+  "name": "casil-shots-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite", "build": "vite build", "preview": "vite preview" },
+  "dependencies": { "motion-v": "^1.7.1", "vue": "^3.5.13", "vue-router": "^4.5.0" },
+  "devDependencies": { "@vitejs/plugin-vue": "^5.2.1", "vite": "^6.0.5" }
+}
