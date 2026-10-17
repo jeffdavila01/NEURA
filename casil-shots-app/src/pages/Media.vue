@@ -17,6 +17,6 @@ const featured = computed(() => films.value.filter(film => film.featured).slice(
   <section class="section">
     <MediaCoverFlow :films="featured" @play="active = $event" />
     <div v-if="active" class="video-modal" @click.self="active = null"><button aria-label="Close" @click="active = null">CLOSE</button><video v-if="active.video" :src="active.video" controls autoplay/><div v-else class="video-placeholder"><span class="eyebrow">Media preview</span><h2>{{ active.title }}</h2><p>Demo preview. Add a working video URL in the Media Manager to play a film here.</p></div></div>
-    <p class="notice">These are six demo media slots with image previews. Video playback becomes available when a working video URL is supplied. Manage the featured items in the <RouterLink to="/media-manager-demo" class="text-link">Media Manager Demo</RouterLink>.</p>
+    <p class="notice">These are six sample media stories from the Casil Shots archive.</p>
   </section>
 </template>

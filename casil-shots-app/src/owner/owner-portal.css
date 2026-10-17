@@ -1,0 +1,11 @@
+#owner-app { min-height:100vh; display:flex; flex-direction:column; }
+.owner-site-header { height:78px; padding:0 clamp(20px,7vw,100px); display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #ffffff18; background:#10100ff5; }
+.owner-brand { display:flex; align-items:center; gap:16px; }
+.owner-brand img { width:102px; height:58px; object-fit:contain; }
+.owner-brand span,.owner-public-link { color:#c6a15c; letter-spacing:.18em; font-size:9px; font-weight:700; }
+.owner-public-link { color:#d4d0c7; letter-spacing:.08em; font-weight:500; }
+.owner-site-main { flex:1; }
+.owner-site-footer { display:flex; justify-content:space-between; gap:20px; padding:22px clamp(20px,7vw,100px); color:#77746d; border-top:1px solid #ffffff18; font-size:9px; letter-spacing:.12em; }
+.owner-auth-hero,.owner-studio-hero { padding-top:72px; padding-bottom:52px; }
+.owner-auth-section,.owner-studio-section { padding-top:52px; padding-bottom:75px; }
+@media(max-width:560px) { .owner-site-header { height:68px; } .owner-brand img { width:85px; } .owner-brand { gap:10px; } .owner-brand span { font-size:8px; } .owner-site-footer { flex-direction:column; } }
